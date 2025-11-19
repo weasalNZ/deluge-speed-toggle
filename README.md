@@ -13,23 +13,44 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 
 ## Installation
 
-### Requirements
+### Method 1: HACS (Recommended)
 
-- Home Assistant (Core 2021.12 or later)
-- Deluge torrent client with JSON-RPC API enabled
+1. **Add Custom Repository** in HACS:
+   - Go to HACS → Integrations → ⋮ (three dots) → Custom repositories
+   - Add URL: `https://github.com/weasalNZ/deluge-speed-toggle`
+   - Category: Integration
+   - Click "Add"
+
+2. **Install via HACS**:
+   - Search for "Deluge Speed Toggle" in HACS Integrations
+   - Click "Download" 
+   - Restart Home Assistant
+
+3. **Add Integration**:
+   - Go to Settings → Devices & Services
+   - Click "Add Integration"
+   - Search for "Deluge Speed Toggle"
+
+### Method 2: Manual Installation
+
+#### Requirements
+
+- Home Assistant (Core 2024.1.0 or later)
+- Deluge torrent client with JSON-RPC API enabled  
 - Network access to Deluge from Home Assistant
 
-### Setup Steps
+#### Setup Steps
 
 1. **Copy the component files** to your Home Assistant `custom_components` directory:
    ```
-   ~/.homeassistant/custom_components/deluge_speed/
+   ~/.homeassistant/custom_components/deluge_speed_toggle/
    ├── __init__.py
    ├── config_flow.py
    ├── const.py
    ├── manifest.json
    ├── services.yaml
    ├── speed_toggle.py
+   ├── switch.py
    └── README.md
    ```
 
