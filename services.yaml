@@ -1,0 +1,19 @@
+set_speed:
+  description: "Set Deluge global download and upload speed"
+  fields:
+    download:
+      description: "Download speed in KiB/s (-1 for unlimited)"
+      example: 1024
+      required: true
+    upload:
+      description: "Upload speed in KiB/s (-1 for unlimited)"
+      example: 1024
+      required: true
+
+toggle_download_speed:
+  description: "Toggle Deluge speeds between two presets (both download and upload)"
+  note: "ON = Preset 2, OFF = Preset 1"
+
+test_connection:
+  description: "Test connection to Deluge server (for diagnostics)"
+
