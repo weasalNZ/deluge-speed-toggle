@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deluge Status Card - RPi Monitor Style</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #58a6ff;
+        }
+        
+        .header p {
+            color: #8b949e;
+            margin: 10px 0 0 0;
+        }
+        
+        .card {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .card-header {
+            background: #58a6ff;
+            color: white;
+            padding: 12px 16px;
+            font-weight: 500;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .switch-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .switch {
+            width: 40px;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .switch.on {
+            background: #4caf50;
+        }
+        
+        .switch-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        
+        .switch.on .switch-thumb {
+            transform: translateX(20px);
+        }
+        
+        .card-content {
+            padding: 16px;
+        }
+        
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 8px;
+            background: #161b22;
+            border-radius: 6px;
+        }
+        
+        .status-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .unlimited {
+            background: #4caf50;
+        }
+        
+        .limited {
+            background: #ff9800;
+        }
+        
+        .status-info {
+            flex: 1;
+        }
+        
+        .status-primary {
+            font-weight: 500;
+            color: #e6edf3;
+            margin-bottom: 2px;
+        }
+        
+        .status-secondary {
+            font-size: 12px;
+            color: #8b949e;
+        }
+        
+        .info-section {
+            margin-bottom: 16px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+            color: #e6edf3;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .speed-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .speed-item {
+            background: #161b22;
+            padding: 8px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .download-icon {
+            color: #58a6ff;
+        }
+        
+        .upload-icon {
+            color: #4caf50;
+        }
+        
+        .speed-label {
+            font-size: 12px;
+            color: #8b949e;
+        }
+        
+        .speed-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e6edf3;
+        }
+        
+        .torrent-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .torrent-stat {
+            background: #161b22;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e6edf3;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #8b949e;
+            margin-top: 2px;
+            display: block;
+        }
+        
+        .installation {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .installation h3 {
+            color: #58a6ff;
+            margin-top: 0;
+        }
+        
+        .code-block {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .step {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .step:last-child {
+            border-bottom: none;
+        }
+        
+        .step h4 {
+            color: #4caf50;
+            margin: 0 0 10px 0;
+        }
+        
+        .unavailable {
+            font-size: 12px;
+            color: #8b949e;
+            font-style: italic;
+            text-align: center;
+            padding: 8px;
+        }
+        
+        .demo-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .demo-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 12px;
+        }
+        
+        .demo-btn:hover {
+            background: #2ea043;
+        }
+        
+        .torrent-list {
+            margin-top: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .torrent-item {
+            background: #161b22;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-left: 3px solid #30363d;
+        }
+
+        .torrent-item.downloading {
+            border-left-color: #4caf50;
+        }
+
+        .torrent-item.seeding {
+            border-left-color: #ff9800;
+        }
+
+        .torrent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .torrent-name-container {
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        .torrent-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #e6edf3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .torrent-label {
+            font-size: 10px;
+            color: #8b949e;
+            background: #21262d;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-top: 2px;
+            display: inline-block;
+            border: 1px solid #30363d;
+        }
+
+        .torrent-state-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .torrent-state {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .torrent-state.downloading {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .torrent-state.seeding {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+        }
+
+        .torrent-progress {
+            font-size: 10px;
+            color: #8b949e;
+            font-weight: 500;
+        }
+
+        .torrent-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .torrent-speeds {
+            display: flex;
+            gap: 8px;
+            font-size: 10px;
+            color: #8b949e;
+        }
+
+        .speed-down {
+            color: #58a6ff;
+        }
+
+        .speed-up {
+            color: #4caf50;
+        }
+
+        .torrent-progress-bar {
+            width: 60px;
+            height: 4px;
+            background: #30363d;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.downloading {
+            background: #4caf50;
+        }
+
+        .progress-fill.seeding {
+            background: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Deluge Status Card</h1>
+            <p>RPi Monitor style card for Deluge torrent client</p>
+        </div>
+        
+        <div class="demo-controls">
+            <button class="demo-btn" onclick="toggleMode()">Toggle Speed Mode</button>
+            <button class="demo-btn" onclick="updateSpeeds()">Simulate Activity</button>
+        </div>
+        
+        <!-- Demo Card -->
+        <div class="card">
+            <div class="card-header">
+                Deluge Server
+                <div class="switch-container">
+                    <div class="switch" id="demoSwitch" onclick="toggleMode()">
+                        <div class="switch-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-content">
+                <div class="status-row">
+                    <div class="status-indicator unlimited" id="statusIndicator">
+                        ♾️
+                    </div>
+                    <div class="status-info">
+                        <div class="status-primary" id="statusPrimary">Unlimited Speed</div>
+                        <div class="status-secondary" id="statusSecondary">No limits</div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <div class="section-title">
+                        <span>🏃</span>
+                        Current Speed
+                    </div>
+                    <div class="speed-grid">
+                        <div class="speed-item">
+                            <span class="download-icon">⬇️</span>
+                            <span class="speed-label">Download</span>
+                            <span class="speed-value" id="downloadSpeed">2.3 MB/s</span>
+                        </div>
+                        <div class="speed-item">
+                            <span class="upload-icon">⬆️</span>
+                            <span class="speed-label">Upload</span>
+                            <span class="speed-value" id="uploadSpeed">0.8 MB/s</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <div class="section-title">
+                        <span>📁</span>
+                        Torrents (12)
+                    </div>
+                    <div class="torrent-grid">
+                        <div class="torrent-stat">
+                            <span class="stat-value" id="activeTorrents">3</span>
+                            <span class="stat-label">Active</span>
+                        </div>
+                        <div class="torrent-stat">
+                            <span class="stat-value" id="downloadingTorrents">2</span>
+                            <span class="stat-label">Downloading</span>
+                        </div>
+                        <div class="torrent-stat">
+                            <span class="stat-value" id="seedingTorrents">1</span>
+                            <span class="stat-label">Seeding</span>
+                        </div>
+                    </div>
+                    
+                    <div class="torrent-list">
+                        <div class="torrent-item downloading">
+                            <div class="torrent-header">
+                                <div class="torrent-name-container">
+                                    <div class="torrent-name">Ubuntu 22.04.3 Desktop amd64.iso</div>
+                                    <div class="torrent-label">Linux</div>
+                                </div>
+                                <div class="torrent-state-container">
+                                    <span class="torrent-state downloading">Downloading</span>
+                                    <span class="torrent-progress">73%</span>
+                                </div>
+                            </div>
+                            <div class="torrent-details">
+                                <div class="torrent-speeds">
+                                    <span class="speed-down">↓ 2.3 MB/s</span>
+                                    <span class="speed-up">↑ 0.1 MB/s</span>
+                                    <span class="ratio">Ratio: 0.12</span>
+                                </div>
+                                <div class="torrent-progress-bar">
+                                    <div class="progress-fill downloading" style="width: 73%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="torrent-item seeding">
+                            <div class="torrent-header">
+                                <div class="torrent-name-container">
+                                    <div class="torrent-name">Movie Collection 2024 1080p BluRay</div>
+                                    <div class="torrent-label">Movies</div>
+                                </div>
+                                <div class="torrent-state-container">
+                                    <span class="torrent-state seeding">Seeding</span>
+                                    <span class="torrent-progress">100%</span>
+                                </div>
+                            </div>
+                            <div class="torrent-details">
+                                <div class="torrent-speeds">
+                                    <span class="speed-down">↓ 0 KB/s</span>
+                                    <span class="speed-up">↑ 0.8 MB/s</span>
+                                    <span class="ratio">Ratio: 2.34</span>
+                                </div>
+                                <div class="torrent-progress-bar">
+                                    <div class="progress-fill seeding" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="torrent-item downloading">
+                            <div class="torrent-header">
+                                <div class="torrent-name-container">
+                                    <div class="torrent-name">Software Development Tools v2.1</div>
+                                    <div class="torrent-label">Software</div>
+                                </div>
+                                <div class="torrent-state-container">
+                                    <span class="torrent-state downloading">Downloading</span>
+                                    <span class="torrent-progress">45%</span>
+                                </div>
+                            </div>
+                            <div class="torrent-details">
+                                <div class="torrent-speeds">
+                                    <span class="speed-down">↓ 1.2 MB/s</span>
+                                    <span class="speed-up">↑ 0.3 MB/s</span>
+                                    <span class="ratio">Ratio: 0.08</span>
+                                </div>
+                                <div class="torrent-progress-bar">
+                                    <div class="progress-fill downloading" style="width: 45%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="installation">
+            <h3>🛠️ Installation Steps</h3>
+            
+            <div class="step">
+                <h4>Step 1: Copy the card file</h4>
+                <p>Copy <code>deluge-status-card.js</code> to your Home Assistant <code>www</code> folder:</p>
+                <div class="code-block">/config/www/deluge-status-card.js</div>
+            </div>
+            
+            <div class="step">
+                <h4>Step 2: Add to Lovelace resources</h4>
+                <p>In Home Assistant, go to Settings → Dashboards → Resources and add:</p>
+                <div class="code-block">URL: /local/deluge-status-card.js
+Type: JavaScript Module</div>
+            </div>
+            
+            <div class="step">
+                <h4>Step 3: Add card to dashboard</h4>
+                <p>Add this YAML to your Lovelace dashboard:</p>
+                <div class="code-block">type: custom:deluge-status-card
+entity: switch.deluge_speed_toggle_localhost_8112_switch
+name: "My Deluge Server"
+show_speed: true
+show_torrents: true</div>
+            </div>
+            
+            <div class="step">
+                <h4>Step 4: Install enhanced sensors (optional)</h4>
+                <p>To get real-time speed and torrent data, update your integration with the enhanced sensor.py file.</p>
+                <div class="unavailable">Without sensors: Shows "monitoring not available" instead of live data</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLimited = false;
+        
+        function toggleMode() {
+            isLimited = !isLimited;
+            
+            const demoSwitch = document.getElementById('demoSwitch');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusPrimary = document.getElementById('statusPrimary');
+            const statusSecondary = document.getElementById('statusSecondary');
+            
+            if (isLimited) {
+                demoSwitch.classList.add('on');
+                statusIndicator.classList.remove('unlimited');
+                statusIndicator.classList.add('limited');
+                statusIndicator.textContent = '🚶';
+                statusPrimary.textContent = 'Speed Limited';
+                statusSecondary.textContent = '500/100 KB/s';
+            } else {
+                demoSwitch.classList.remove('on');
+                statusIndicator.classList.remove('limited');
+                statusIndicator.classList.add('unlimited');
+                statusIndicator.textContent = '♾️';
+                statusPrimary.textContent = 'Unlimited Speed';
+                statusSecondary.textContent = 'No limits';
+            }
+        }
+        
+        function updateSpeeds() {
+            const downloadSpeed = document.getElementById('downloadSpeed');
+            const uploadSpeed = document.getElementById('uploadSpeed');
+            const totalTorrents = document.getElementById('totalTorrents');
+            const activeTorrents = document.getElementById('activeTorrents');
+            
+            // Simulate random speeds
+            const dl = (Math.random() * 5).toFixed(1);
+            const ul = (Math.random() * 2).toFixed(1);
+            const total = Math.floor(Math.random() * 20) + 5;
+            const active = Math.floor(Math.random() * 5) + 1;
+            
+            downloadSpeed.textContent = `${dl} MB/s`;
+            uploadSpeed.textContent = `${ul} MB/s`;
+            totalTorrents.textContent = total;
+            activeTorrents.textContent = active;
+        }
+        
+        // Auto-update demo every 3 seconds
+        setInterval(updateSpeeds, 3000);
+    </script>
+</body>
+</html>

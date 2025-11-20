@@ -196,6 +196,75 @@ async def async_setup_services(hass: HomeAssistant):
     
     hass.services.async_register(DOMAIN, "test_connection", handle_test_connection)
     _LOGGER.debug("Registered deluge_speed_toggle.test_connection service")
+    
+    # Add API diagnostic service
+    async def handle_test_api(call: ServiceCall):
+        """Test various Deluge API methods to see what works."""
+        config = hass.data[DOMAIN]
+        host = config["host"]
+        port = config["port"]
+        password = config["password"]
+        
+        try:
+            _LOGGER.info("Testing Deluge API methods...")
+            connector = aiohttp.TCPConnector()
+            cookie_jar = aiohttp.CookieJar(unsafe=True)
+            
+            async with aiohttp.ClientSession(
+                connector=connector, 
+                cookie_jar=cookie_jar,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as session:
+                
+                # Authenticate first
+                auth_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "auth.login", "params": [password], "id": 1}
+                )
+                
+                auth_result = await auth_response.json()
+                if not auth_result.get("result"):
+                    _LOGGER.error("❌ API Test: Authentication failed - %s", auth_result)
+                    return
+                    
+                _LOGGER.info("✅ API Test: Authentication successful")
+                
+                # Test different API methods with authenticated session and correct parameters
+                test_calls = [
+                    {"method": "daemon.get_method_list", "params": []},
+                    {"method": "core.get_session_status", "params": [["download_rate", "upload_rate"]]}, 
+                    {"method": "core.get_torrents_status", "params": [{}, ["name", "state", "progress"]]},
+                    {"method": "core.get_config", "params": []}
+                ]
+                
+                for test_call in test_calls:
+                    method = test_call["method"]
+                    try:
+                        response = await session.post(
+                            f"http://{host}:{port}/json",
+                            json={"method": method, "params": test_call["params"], "id": 2}
+                        )
+                        result = await response.json()
+                        if result.get("error"):
+                            _LOGGER.warning("⚠️  API Test: %s returned error: %s", method, result.get("error"))
+                        else:
+                            _LOGGER.info("✅ API Test: %s works - returned %d bytes", method, len(str(result)))
+                            if method == "daemon.get_method_list":
+                                methods = result.get("result", [])
+                                _LOGGER.info("📋 Available methods: %s", methods[:10])  # Show first 10
+                            elif method == "core.get_session_status":
+                                session_data = result.get("result", {})
+                                _LOGGER.info("📊 Session stats: download=%s, upload=%s", 
+                                           session_data.get("download_rate", 0),
+                                           session_data.get("upload_rate", 0))
+                    except Exception as err:
+                        _LOGGER.error("❌ API Test: %s failed: %s", method, err)
+                        
+        except Exception as err:
+            _LOGGER.error("❌ API Test failed: %s", err)
+    
+    hass.services.async_register(DOMAIN, "test_api", handle_test_api)
+    _LOGGER.debug("Registered deluge_speed_toggle.test_api service")
 
 class DelugeSpeedToggleSwitch(SwitchEntity):
     """Switch to toggle between two presets of Deluge download/upload speeds."""
@@ -210,7 +279,7 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         self._attr_unique_id = f"{DOMAIN}_{host}_{port}_switch"
         self._attr_device_class = SwitchDeviceClass.SWITCH
         self._is_on = False
-        self._attr_should_poll = False  # Changed to False - we manage state manually
+        self._attr_should_poll = True  # Enable polling to refresh attributes with sensor data
         self._available = True
         
         # Add device info for better integration
@@ -227,12 +296,25 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
     async def async_added_to_hass(self):
         """When entity is added to hass."""
         _LOGGER.info("Deluge Speed Toggle switch added to Home Assistant with ID: %s", self.unique_id)
-        # Test connection on startup
+        # Restore previous state if available
+        try:
+            if (last_state := await self.async_get_last_state_with_restored_native_value()) is not None:
+                self._is_on = last_state.state == "on"
+                _LOGGER.debug("Restored previous switch state: %s", "ON" if self._is_on else "OFF")
+        except AttributeError:
+            # Fallback for different HA versions
+            _LOGGER.debug("State restoration not available, will detect from Deluge")
+        
+        # Test connection and detect current state on startup
         try:
             await self._test_connection()
             _LOGGER.info("Initial Deluge connection test successful")
+            
+            # Detect current Deluge speed settings to sync switch state
+            await self._detect_current_state()
+            
         except Exception as err:
-            _LOGGER.warning("Initial Deluge connection test failed: %s", err)
+            _LOGGER.warning("Initial Deluge connection/state detection failed: %s", err)
             self._available = False
 
     async def _test_connection(self) -> bool:
@@ -257,6 +339,132 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
                     raise HomeAssistantError("Authentication failed")
                 
                 return True
+
+    async def _detect_current_state(self):
+        """Detect current Deluge speed settings and set switch state accordingly."""
+        host = self.config.get("host", "localhost")
+        port = self.config.get("port", 8112)
+        password = self.config.get("password")
+        
+        preset1_download = self.config.get(CONF_PRESET1_DOWNLOAD, DEFAULT_PRESET1_DOWNLOAD)
+        preset1_upload = self.config.get(CONF_PRESET1_UPLOAD, DEFAULT_PRESET1_UPLOAD)
+        preset2_download = self.config.get(CONF_PRESET2_DOWNLOAD, DEFAULT_PRESET2_DOWNLOAD)
+        preset2_upload = self.config.get(CONF_PRESET2_UPLOAD, DEFAULT_PRESET2_UPLOAD)
+        
+        _LOGGER.debug("Detecting current Deluge speed configuration...")
+        
+        try:
+            connector = aiohttp.TCPConnector()
+            cookie_jar = aiohttp.CookieJar(unsafe=True)
+            
+            async with aiohttp.ClientSession(
+                connector=connector,
+                cookie_jar=cookie_jar,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as session:
+                
+                # Authenticate
+                auth_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "auth.login", "params": [password], "id": 1}
+                )
+                
+                auth_result = await auth_response.json()
+                if not auth_result.get("result"):
+                    _LOGGER.warning("Could not authenticate to detect current state")
+                    return
+                
+                # Get current config
+                config_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "core.get_config", "params": [], "id": 2}
+                )
+                
+                config_result = await config_response.json()
+                if config_result.get("error"):
+                    _LOGGER.warning("Could not get config to detect current state: %s", config_result.get("error"))
+                    return
+                
+                # Convert to regular dict to avoid mappingproxy issues
+                current_config = dict(config_result.get("result", {}))
+                current_download = current_config.get("max_download_speed", -1)
+                current_upload = current_config.get("max_upload_speed", -1)
+                
+                _LOGGER.debug("Current Deluge config - Download: %s, Upload: %s", current_download, current_upload)
+                _LOGGER.debug("Preset 1 (Limited) - Download: %s, Upload: %s", preset1_download, preset1_upload)
+                _LOGGER.debug("Preset 2 (Unlimited) - Download: %s, Upload: %s", preset2_download, preset2_upload)
+                
+                # Determine which preset matches current settings
+                preset1_match = (current_download == preset1_download and current_upload == preset1_upload)
+                preset2_match = (current_download == preset2_download and current_upload == preset2_upload)
+                
+                if preset1_match:
+                    self._is_on = True
+                    _LOGGER.info("Detected Deluge is using Preset 1 (Limited) - Switch ON")
+                elif preset2_match:
+                    self._is_on = False
+                    _LOGGER.info("Detected Deluge is using Preset 2 (Unlimited) - Switch OFF")
+                else:
+                    # Current settings don't match either preset
+                    # Check if speeds are limited (not unlimited)
+                    speeds_are_limited = (current_download != -1 or current_upload != -1)
+                    
+                    if speeds_are_limited:
+                        # Deluge has custom limited speeds - adapt Preset 1 to match and set switch ON
+                        self._is_on = True
+                        _LOGGER.info("Detected custom limited speeds in Deluge (Download: %s, Upload: %s) - Setting Switch ON and adapting Preset 1", 
+                                   current_download, current_upload)
+                        
+                        # Update our internal preset 1 to match current Deluge settings
+                        # This allows the switch to work with whatever speeds are currently set
+                        self.config[CONF_PRESET1_DOWNLOAD] = current_download
+                        self.config[CONF_PRESET1_UPLOAD] = current_upload
+                        
+                        # Log the adaptation
+                        _LOGGER.info("Adapted Preset 1 to match current Deluge settings: Download=%s KiB/s, Upload=%s KiB/s", 
+                                   current_download, current_upload)
+                        
+                        # Save the adapted preset to config entry for persistence
+                        await self._save_adapted_preset(current_download, current_upload)
+                        
+                    else:
+                        # Speeds are unlimited (-1, -1) but don't match preset 2 exactly (shouldn't happen)
+                        self._is_on = False
+                        _LOGGER.info("Detected unlimited speeds - Switch OFF")
+                
+                # Update Home Assistant state
+                self.async_write_ha_state()
+                
+        except Exception as err:
+            _LOGGER.warning("Could not detect current Deluge state: %s", err)
+
+    async def _save_adapted_preset(self, download_speed: int, upload_speed: int):
+        """Save adapted preset speeds to config entry for persistence."""
+        try:
+            # Get the config entry
+            config_entry = None
+            for entry in self.hass.config_entries.async_entries(DOMAIN):
+                if entry.data.get("host") == self.config.get("host") and entry.data.get("port") == self.config.get("port"):
+                    config_entry = entry
+                    break
+            
+            if config_entry:
+                # Update the config entry with new preset 1 values
+                new_data = dict(config_entry.data)
+                new_data[CONF_PRESET1_DOWNLOAD] = download_speed
+                new_data[CONF_PRESET1_UPLOAD] = upload_speed
+                
+                self.hass.config_entries.async_update_entry(
+                    config_entry, 
+                    data=new_data
+                )
+                
+                _LOGGER.info("Saved adapted Preset 1 to configuration: Download=%s, Upload=%s", download_speed, upload_speed)
+            else:
+                _LOGGER.warning("Could not find config entry to save adapted preset")
+                
+        except Exception as err:
+            _LOGGER.warning("Could not save adapted preset: %s", err)
 
     async def async_turn_on(self, **kwargs) -> None:
         """Turn on (set to preset 1 - limited speeds)."""
@@ -594,6 +802,14 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
                 f"4. No firewall is blocking the connection"
             )
 
+    async def async_update(self):
+        """Update the switch state and refresh attributes from sensor data."""
+        # The state itself doesn't change from sensors, but this ensures 
+        # attributes are refreshed regularly to show current torrent data
+        _LOGGER.debug("Refreshing switch attributes from sensor data")
+        # The extra_state_attributes property will be called automatically
+        # and will pull fresh data from the sensor entities
+
     @property
     def is_on(self):
         """Return True if switch is on (preset 2)."""
@@ -611,13 +827,14 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
     
     @property
     def extra_state_attributes(self):
-        """Return extra state attributes."""
+        """Return extra state attributes including monitoring data."""
         preset1_down = self.config.get(CONF_PRESET1_DOWNLOAD, DEFAULT_PRESET1_DOWNLOAD)
         preset1_up = self.config.get(CONF_PRESET1_UPLOAD, DEFAULT_PRESET1_UPLOAD)
         preset2_down = self.config.get(CONF_PRESET2_DOWNLOAD, DEFAULT_PRESET2_DOWNLOAD)
         preset2_up = self.config.get(CONF_PRESET2_UPLOAD, DEFAULT_PRESET2_UPLOAD)
         
-        return {
+        # Base attributes for speed presets
+        attributes = {
             "preset_1_download": f"{preset1_down} KiB/s" if preset1_down != -1 else "Unlimited",
             "preset_1_upload": f"{preset1_up} KiB/s" if preset1_up != -1 else "Unlimited",
             "preset_2_download": f"{preset2_down} KiB/s" if preset2_down != -1 else "Unlimited", 
@@ -625,3 +842,57 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
             "current_preset": "Preset 1 (Limited)" if self._is_on else "Preset 2 (Unlimited)",
             "deluge_host": f"{self.config.get('host', 'localhost')}:{self.config.get('port', 8112)}"
         }
+        
+        # Try to get live monitoring data from sensor entities
+        try:
+            # Get sensor states from the registry
+            download_speed_entity = self.hass.states.get("sensor.deluge_download_speed")
+            upload_speed_entity = self.hass.states.get("sensor.deluge_upload_speed")
+            torrent_count_entity = self.hass.states.get("sensor.deluge_torrent_count")
+            active_torrents_entity = self.hass.states.get("sensor.deluge_active_torrents")
+            status_entity = self.hass.states.get("sensor.deluge_status")
+            
+            if download_speed_entity and download_speed_entity.state not in ["unknown", "unavailable"]:
+                # Add current speeds
+                download_speed = float(download_speed_entity.state) if download_speed_entity.state else 0
+                upload_speed = float(upload_speed_entity.state) if upload_speed_entity and upload_speed_entity.state else 0
+                
+                # Convert bytes/sec to KB/s for better readability
+                download_kbps = round(download_speed / 1024, 2) if download_speed > 0 else 0
+                upload_kbps = round(upload_speed / 1024, 2) if upload_speed > 0 else 0
+                
+                attributes.update({
+                    "current_download_speed": f"{download_kbps} KB/s",
+                    "current_upload_speed": f"{upload_kbps} KB/s",
+                    "download_speed_bytes": download_speed,
+                    "upload_speed_bytes": upload_speed,
+                })
+            
+            if torrent_count_entity and torrent_count_entity.state not in ["unknown", "unavailable"]:
+                # Add torrent counts
+                attributes.update({
+                    "total_torrents": torrent_count_entity.state,
+                    "active_torrents": torrent_count_entity.attributes.get("active_torrents", 0),
+                    "downloading_torrents": torrent_count_entity.attributes.get("downloading", 0),
+                    "seeding_torrents": torrent_count_entity.attributes.get("seeding", 0),
+                })
+            
+            if active_torrents_entity:
+                # Add active torrents list (up to 5 most recent for display)
+                torrents = active_torrents_entity.attributes.get("torrents", [])
+                if torrents:
+                    attributes["torrent_list"] = torrents[:5]  # Limit to first 5 for display
+                    attributes["torrent_count_display"] = len(torrents)
+            
+            if status_entity:
+                # Add connection status
+                attributes.update({
+                    "connection_status": status_entity.state,
+                    "last_update": status_entity.attributes.get("last_update", "Never"),
+                })
+                
+        except Exception as err:
+            _LOGGER.debug("Could not fetch sensor data for switch attributes: %s", err)
+            # Continue with basic attributes if sensor data unavailable
+        
+        return attributes

@@ -10,6 +10,8 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 - 🔒 **Secure**: Password-protected connection to Deluge
 - 📝 **Logging**: Comprehensive logging for troubleshooting
 - ✅ **Connection Validation**: Tests Deluge connection before saving configuration
+- 📈 **Real-time Monitoring**: Optional sensors for download/upload speeds and torrent statistics
+- 🎨 **Custom Lovelace Card**: Beautiful status card with speed control and torrent overview
 
 ## Installation
 
@@ -248,21 +250,68 @@ curl -X POST http://localhost:8112/json \
   }'
 ```
 
+## Custom Lovelace Card
+
+This integration includes a beautiful custom Lovelace card for enhanced visualization:
+
+### Card Features
+- **Speed Toggle**: Visual switch with instant speed preset switching
+- **Real-time Speeds**: Live download/upload speed monitoring
+- **Torrent Overview**: Active torrent counts and detailed list
+- **Status Indicators**: Clear visual feedback for current speed limits
+- **Theme Integration**: Adapts to your Home Assistant theme
+
+### Card Installation
+
+1. **Copy the card file** to your Home Assistant:
+   ```
+   /config/www/community/deluge-status-card/deluge-status-card.js
+   ```
+
+2. **Add resource** in Home Assistant:
+   - Go to **Settings → Dashboards → Resources**
+   - Add resource: `/local/community/deluge-status-card/deluge-status-card.js` (JavaScript Module)
+
+3. **Add card** to your dashboard:
+   ```yaml
+   type: custom:deluge-status-card
+   entity: switch.deluge_speed_toggle_localhost_8112_switch
+   name: "Deluge Server"
+   show_speed: true
+   show_torrents: true
+   ```
+
+4. **Preview the card design** by opening `deluge-status-card-preview.html` in your browser
+
+### Card Configuration Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `entity` | **Required** | Your Deluge speed toggle switch entity |
+| `name` | `"Deluge Server"` | Display name in card header |
+| `show_title` | `true` | Show/hide the card header |
+| `show_speed` | `true` | Show/hide current speed section |
+| `show_torrents` | `true` | Show/hide torrent statistics |
+
 ## Development
 
 ### Project Structure
 
 ```
-deluge_speed/
-├── __init__.py              # Integration entry point
-├── config_flow.py           # Configuration UI
-├── const.py                 # Constants and defaults
-├── manifest.json            # Integration metadata
-├── services.yaml            # Service definitions
-├── speed_toggle.py          # Switch entity and service logic
-├── README.md                # This file
-└── .github/
-    └── copilot-instructions.md  # AI agent documentation
+deluge_speed_toggle/
+├── custom_components/deluge_speed_toggle/
+│   ├── __init__.py              # Integration entry point
+│   ├── config_flow.py           # Configuration UI
+│   ├── const.py                 # Constants and defaults
+│   ├── manifest.json            # Integration metadata
+│   ├── services.yaml            # Service definitions
+│   ├── sensor.py                # Monitoring sensors
+│   ├── speed_toggle.py          # Switch entity and service logic
+│   └── switch.py                # Switch platform
+├── www/community/deluge-status-card/
+│   └── deluge-status-card.js    # Custom Lovelace card
+├── deluge-status-card-preview.html # Card design preview
+└── README.md                    # This file
 ```
 
 ### Making Changes

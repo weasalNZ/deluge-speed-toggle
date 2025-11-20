@@ -2,6 +2,6 @@
   "name": "Deluge Speed Toggle",
   "content_in_root": false,
   "render_readme": true,
-  "domains": ["switch"],
+  "domains": ["switch", "sensor"],
   "homeassistant": "2024.1.0"
 }

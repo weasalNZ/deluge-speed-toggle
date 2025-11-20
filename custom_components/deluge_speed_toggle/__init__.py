@@ -8,10 +8,10 @@ _LOGGER = logging.getLogger(__name__)
 # Platform constants for compatibility
 try:
     from homeassistant.const import Platform
-    PLATFORMS = [Platform.SWITCH]
+    PLATFORMS = [Platform.SWITCH, Platform.SENSOR]
 except ImportError:
     # Older HA versions don't have Platform enum
-    PLATFORMS = ["switch"]
+    PLATFORMS = ["switch", "sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry):
     """Set up Deluge Speed from a config entry."""
