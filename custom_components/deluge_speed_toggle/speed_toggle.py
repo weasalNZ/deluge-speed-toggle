@@ -265,6 +265,282 @@ async def async_setup_services(hass: HomeAssistant):
     
     hass.services.async_register(DOMAIN, "test_api", handle_test_api)
     _LOGGER.debug("Registered deluge_speed_toggle.test_api service")
+    
+    # Add torrent management services
+    async def handle_add_torrent(call: ServiceCall):
+        """Add torrent to Deluge from magnet link or torrent file."""
+        config = hass.data[DOMAIN]
+        host = config["host"]
+        port = config["port"]
+        password = config["password"]
+        
+        magnet_link = call.data.get("magnet_link")
+        torrent_url = call.data.get("torrent_url")
+        torrent_data = call.data.get("torrent_data")
+        download_location = call.data.get("download_location")
+        
+        if not any([magnet_link, torrent_url, torrent_data]):
+            _LOGGER.error("No torrent source provided (magnet_link, torrent_url, or torrent_data required)")
+            return
+        
+        try:
+            connector = aiohttp.TCPConnector()
+            cookie_jar = aiohttp.CookieJar(unsafe=True)
+            
+            async with aiohttp.ClientSession(
+                connector=connector,
+                cookie_jar=cookie_jar,
+                timeout=aiohttp.ClientTimeout(total=30)
+            ) as session:
+                
+                # Authenticate
+                auth_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "auth.login", "params": [password], "id": 1}
+                )
+                
+                auth_result = await auth_response.json()
+                if not auth_result.get("result"):
+                    _LOGGER.error("Authentication failed for add_torrent: %s", auth_result)
+                    return
+                
+                # Add torrent based on source type
+                if magnet_link:
+                    # Add magnet link
+                    options = {}
+                    if download_location:
+                        options["download_location"] = download_location
+                    
+                    response = await session.post(
+                        f"http://{host}:{port}/json",
+                        json={
+                            "method": "core.add_torrent_magnet",
+                            "params": [magnet_link, options],
+                            "id": 2
+                        }
+                    )
+                    result = await response.json()
+                    
+                elif torrent_url:
+                    # Download and add torrent from URL
+                    import base64
+                    torrent_response = await session.get(torrent_url)
+                    torrent_bytes = await torrent_response.read()
+                    torrent_b64 = base64.b64encode(torrent_bytes).decode()
+                    
+                    options = {}
+                    if download_location:
+                        options["download_location"] = download_location
+                    
+                    response = await session.post(
+                        f"http://{host}:{port}/json",
+                        json={
+                            "method": "core.add_torrent_file",
+                            "params": [None, torrent_b64, options],
+                            "id": 2
+                        }
+                    )
+                    result = await response.json()
+                    
+                elif torrent_data:
+                    # Add torrent from base64 data
+                    options = {}
+                    if download_location:
+                        options["download_location"] = download_location
+                    
+                    response = await session.post(
+                        f"http://{host}:{port}/json",
+                        json={
+                            "method": "core.add_torrent_file", 
+                            "params": [None, torrent_data, options],
+                            "id": 2
+                        }
+                    )
+                    result = await response.json()
+                
+                if result.get("error"):
+                    _LOGGER.error("Failed to add torrent: %s", result.get("error"))
+                elif result.get("result"):
+                    _LOGGER.info("Successfully added torrent: %s", result.get("result"))
+                else:
+                    _LOGGER.warning("Torrent add result unclear: %s", result)
+                    
+        except Exception as err:
+            _LOGGER.error("Error adding torrent: %s", err)
+    
+    async def handle_remove_torrent(call: ServiceCall):
+        """Remove torrent from Deluge."""
+        config = hass.data[DOMAIN]
+        host = config["host"]
+        port = config["port"]
+        password = config["password"]
+        
+        torrent_id = call.data.get("torrent_id")
+        remove_data = call.data.get("remove_data", False)
+        
+        if not torrent_id:
+            _LOGGER.error("torrent_id is required for remove_torrent")
+            return
+        
+        try:
+            connector = aiohttp.TCPConnector()
+            cookie_jar = aiohttp.CookieJar(unsafe=True)
+            
+            async with aiohttp.ClientSession(
+                connector=connector,
+                cookie_jar=cookie_jar, 
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as session:
+                
+                # Authenticate
+                auth_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "auth.login", "params": [password], "id": 1}
+                )
+                
+                auth_result = await auth_response.json()
+                if not auth_result.get("result"):
+                    _LOGGER.error("Authentication failed for remove_torrent: %s", auth_result)
+                    return
+                
+                # Remove torrent
+                response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={
+                        "method": "core.remove_torrent",
+                        "params": [torrent_id, remove_data],
+                        "id": 2
+                    }
+                )
+                result = await response.json()
+                
+                if result.get("error"):
+                    _LOGGER.error("Failed to remove torrent: %s", result.get("error"))
+                elif result.get("result"):
+                    _LOGGER.info("Successfully removed torrent %s (remove_data=%s)", torrent_id, remove_data)
+                else:
+                    _LOGGER.warning("Torrent remove result unclear: %s", result)
+                    
+        except Exception as err:
+            _LOGGER.error("Error removing torrent: %s", err)
+    
+    async def handle_pause_torrent(call: ServiceCall):
+        """Pause torrent in Deluge."""
+        config = hass.data[DOMAIN]
+        host = config["host"]
+        port = config["port"] 
+        password = config["password"]
+        
+        torrent_id = call.data.get("torrent_id")
+        
+        if not torrent_id:
+            _LOGGER.error("torrent_id is required for pause_torrent")
+            return
+        
+        try:
+            connector = aiohttp.TCPConnector()
+            cookie_jar = aiohttp.CookieJar(unsafe=True)
+            
+            async with aiohttp.ClientSession(
+                connector=connector,
+                cookie_jar=cookie_jar,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as session:
+                
+                # Authenticate
+                auth_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "auth.login", "params": [password], "id": 1}
+                )
+                
+                auth_result = await auth_response.json()
+                if not auth_result.get("result"):
+                    _LOGGER.error("Authentication failed for pause_torrent: %s", auth_result)
+                    return
+                
+                # Pause torrent
+                response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={
+                        "method": "core.pause_torrent",
+                        "params": [[torrent_id]],  # Expects list of torrent IDs
+                        "id": 2
+                    }
+                )
+                result = await response.json()
+                
+                if result.get("error"):
+                    _LOGGER.error("Failed to pause torrent: %s", result.get("error"))
+                elif result.get("result") is not None:
+                    _LOGGER.info("Successfully paused torrent %s", torrent_id)
+                else:
+                    _LOGGER.warning("Torrent pause result unclear: %s", result)
+                    
+        except Exception as err:
+            _LOGGER.error("Error pausing torrent: %s", err)
+    
+    async def handle_resume_torrent(call: ServiceCall):
+        """Resume paused torrent in Deluge."""
+        config = hass.data[DOMAIN]
+        host = config["host"]
+        port = config["port"]
+        password = config["password"]
+        
+        torrent_id = call.data.get("torrent_id")
+        
+        if not torrent_id:
+            _LOGGER.error("torrent_id is required for resume_torrent")
+            return
+        
+        try:
+            connector = aiohttp.TCPConnector()
+            cookie_jar = aiohttp.CookieJar(unsafe=True)
+            
+            async with aiohttp.ClientSession(
+                connector=connector,
+                cookie_jar=cookie_jar,
+                timeout=aiohttp.ClientTimeout(total=10)
+            ) as session:
+                
+                # Authenticate 
+                auth_response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={"method": "auth.login", "params": [password], "id": 1}
+                )
+                
+                auth_result = await auth_response.json()
+                if not auth_result.get("result"):
+                    _LOGGER.error("Authentication failed for resume_torrent: %s", auth_result)
+                    return
+                
+                # Resume torrent
+                response = await session.post(
+                    f"http://{host}:{port}/json",
+                    json={
+                        "method": "core.resume_torrent",
+                        "params": [[torrent_id]],  # Expects list of torrent IDs
+                        "id": 2
+                    }
+                )
+                result = await response.json()
+                
+                if result.get("error"):
+                    _LOGGER.error("Failed to resume torrent: %s", result.get("error"))
+                elif result.get("result") is not None:
+                    _LOGGER.info("Successfully resumed torrent %s", torrent_id)
+                else:
+                    _LOGGER.warning("Torrent resume result unclear: %s", result)
+                    
+        except Exception as err:
+            _LOGGER.error("Error resuming torrent: %s", err)
+    
+    # Register all torrent management services
+    hass.services.async_register(DOMAIN, "add_torrent", handle_add_torrent)
+    hass.services.async_register(DOMAIN, "remove_torrent", handle_remove_torrent)
+    hass.services.async_register(DOMAIN, "pause_torrent", handle_pause_torrent)
+    hass.services.async_register(DOMAIN, "resume_torrent", handle_resume_torrent)
+    
+    _LOGGER.debug("Registered torrent management services: add_torrent, remove_torrent, pause_torrent, resume_torrent")
 
 class DelugeSpeedToggleSwitch(SwitchEntity):
     """Switch to toggle between two presets of Deluge download/upload speeds."""

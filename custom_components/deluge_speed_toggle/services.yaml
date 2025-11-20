@@ -17,3 +17,52 @@ toggle_download_speed:
 test_connection:
   description: "Test connection to Deluge server (for diagnostics)"
 
+add_torrent:
+  description: "Add torrent to Deluge from magnet link or torrent file"
+  fields:
+    magnet_link:
+      description: "Magnet link (magnet:?xt=iah:...)"
+      example: "magnet:?xt=urn:btih:abc123..."
+      required: false
+    torrent_url:
+      description: "Direct URL to .torrent file"
+      example: "https://example.com/file.torrent"
+      required: false
+    torrent_data:
+      description: "Base64 encoded .torrent file data"
+      example: "ZDg6YW5ub3VuY2UyNzpodHRwOi8v..."
+      required: false
+    download_location:
+      description: "Custom download location (optional)"
+      example: "/downloads/movies"
+      required: false
+
+remove_torrent:
+  description: "Remove torrent from Deluge"
+  fields:
+    torrent_id:
+      description: "Torrent hash ID"
+      example: "abc123def456..."
+      required: true
+    remove_data:
+      description: "Also delete downloaded files"
+      example: false
+      required: false
+      default: false
+
+pause_torrent:
+  description: "Pause torrent in Deluge"
+  fields:
+    torrent_id:
+      description: "Torrent hash ID"
+      example: "abc123def456..."
+      required: true
+
+resume_torrent:
+  description: "Resume paused torrent in Deluge"
+  fields:
+    torrent_id:
+      description: "Torrent hash ID"
+      example: "abc123def456..."
+      required: true
+

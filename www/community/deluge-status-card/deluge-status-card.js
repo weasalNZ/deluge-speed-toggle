@@ -180,6 +180,7 @@ class DelugeStatusCard extends LitElement {
           </div>
         </div>
         ${this.renderTorrentList(activeEntity)}
+        ${this.renderTorrentManagement()}
       </div>
     `;
   }
@@ -231,8 +232,60 @@ class DelugeStatusCard extends LitElement {
                      style="width: ${torrent.progress}%"></div>
               </div>
             </div>
+            <div class="torrent-actions">
+              ${torrent.state.toLowerCase() === 'paused' ? html`
+                <button class="action-btn resume" @click=${() => this._resumeTorrent(torrent.hash)} title="Resume">
+                  <ha-icon icon="mdi:play"></ha-icon>
+                </button>
+              ` : html`
+                <button class="action-btn pause" @click=${() => this._pauseTorrent(torrent.hash)} title="Pause">
+                  <ha-icon icon="mdi:pause"></ha-icon>
+                </button>
+              `}
+              <button class="action-btn remove" @click=${() => this._removeTorrent(torrent.hash)} title="Remove">
+                <ha-icon icon="mdi:delete"></ha-icon>
+              </button>
+            </div>
           </div>
         `)}
+      </div>
+    `;
+  }
+
+  renderTorrentManagement() {
+    return html`
+      <div class="torrent-management">
+        <div class="section-title">
+          <ha-icon icon="mdi:plus-circle"></ha-icon>
+          Add Torrent
+        </div>
+        <div class="add-torrent-section">
+          <div class="input-group">
+            <input 
+              type="text" 
+              placeholder="Paste magnet link or torrent URL here..."
+              class="torrent-input"
+              @keypress=${this._handleKeyPress}
+              id="torrentInput"
+            />
+            <button class="add-button" @click=${this._addTorrent}>
+              <ha-icon icon="mdi:plus"></ha-icon>
+            </button>
+          </div>
+          <div class="file-input-group">
+            <input 
+              type="file" 
+              accept=".torrent"
+              class="file-input"
+              id="torrentFileInput"
+              @change=${this._handleFileUpload}
+            />
+            <label for="torrentFileInput" class="file-input-label">
+              <ha-icon icon="mdi:file-upload"></ha-icon>
+              Upload .torrent file
+            </label>
+          </div>
+        </div>
       </div>
     `;
   }
@@ -252,6 +305,131 @@ class DelugeStatusCard extends LitElement {
     this.hass.callService('switch', 'toggle', {
       entity_id: this.config.entity
     });
+  }
+
+  _handleKeyPress(e) {
+    if (e.key === 'Enter') {
+      this._addTorrent();
+    }
+  }
+
+  _addTorrent() {
+    const input = this.shadowRoot.querySelector('#torrentInput');
+    const value = input.value.trim();
+    
+    if (!value) {
+      this._showNotification('Please enter a magnet link or torrent URL', 'warning');
+      return;
+    }
+
+    // Determine if it's a magnet link or URL
+    if (value.startsWith('magnet:')) {
+      this.hass.callService('deluge_speed_toggle', 'add_torrent', {
+        magnet_link: value
+      }).then(() => {
+        this._showNotification('Magnet link added successfully!', 'success');
+        input.value = '';
+      }).catch(err => {
+        this._showNotification('Failed to add magnet link: ' + err.message, 'error');
+      });
+    } else if (value.startsWith('http://') || value.startsWith('https://')) {
+      this.hass.callService('deluge_speed_toggle', 'add_torrent', {
+        torrent_url: value
+      }).then(() => {
+        this._showNotification('Torrent URL added successfully!', 'success');
+        input.value = '';
+      }).catch(err => {
+        this._showNotification('Failed to add torrent URL: ' + err.message, 'error');
+      });
+    } else {
+      this._showNotification('Please enter a valid magnet link (magnet:) or HTTP URL', 'warning');
+    }
+  }
+
+  _handleFileUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.torrent')) {
+      this._showNotification('Please select a .torrent file', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const arrayBuffer = event.target.result;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64String = btoa(String.fromCharCode(...uint8Array));
+      
+      this.hass.callService('deluge_speed_toggle', 'add_torrent', {
+        torrent_data: base64String
+      }).then(() => {
+        this._showNotification('Torrent file uploaded successfully!', 'success');
+        e.target.value = ''; // Clear file input
+      }).catch(err => {
+        this._showNotification('Failed to upload torrent file: ' + err.message, 'error');
+      });
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+  _pauseTorrent(torrentId) {
+    if (!torrentId) return;
+    
+    this.hass.callService('deluge_speed_toggle', 'pause_torrent', {
+      torrent_id: torrentId
+    }).then(() => {
+      this._showNotification('Torrent paused successfully!', 'success');
+    }).catch(err => {
+      this._showNotification('Failed to pause torrent: ' + err.message, 'error');
+    });
+  }
+
+  _resumeTorrent(torrentId) {
+    if (!torrentId) return;
+    
+    this.hass.callService('deluge_speed_toggle', 'resume_torrent', {
+      torrent_id: torrentId
+    }).then(() => {
+      this._showNotification('Torrent resumed successfully!', 'success');
+    }).catch(err => {
+      this._showNotification('Failed to resume torrent: ' + err.message, 'error');
+    });
+  }
+
+  _removeTorrent(torrentId) {
+    if (!torrentId) return;
+    
+    // Ask for confirmation
+    if (!confirm('Are you sure you want to remove this torrent? Files will NOT be deleted.')) {
+      return;
+    }
+    
+    this.hass.callService('deluge_speed_toggle', 'remove_torrent', {
+      torrent_id: torrentId,
+      remove_data: false
+    }).then(() => {
+      this._showNotification('Torrent removed successfully!', 'success');
+    }).catch(err => {
+      this._showNotification('Failed to remove torrent: ' + err.message, 'error');
+    });
+  }
+
+  _showNotification(message, type = 'info') {
+    // Use Home Assistant's toast notification system
+    this.hass.callService('system_log', 'write', {
+      message: `Deluge: ${message}`,
+      level: type === 'error' ? 'error' : 'info'
+    });
+    
+    // Also try to show browser notification if possible
+    if ('Notification' in window) {
+      new Notification('Deluge Speed Toggle', {
+        body: message,
+        icon: type === 'success' ? 'mdi:check-circle' : type === 'error' ? 'mdi:alert-circle' : 'mdi:information'
+      });
+    }
   }
 
   static get styles() {
@@ -645,6 +823,142 @@ class DelugeStatusCard extends LitElement {
 
       .status-indicator ha-icon {
         --mdc-icon-size: 20px;
+      }
+
+      /* Torrent Management Styles */
+      .torrent-management {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--divider-color);
+      }
+
+      .add-torrent-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .torrent-input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid var(--divider-color);
+        border-radius: 4px;
+        background: var(--primary-background-color);
+        color: var(--primary-text-color);
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .torrent-input:focus {
+        border-color: var(--primary-color);
+      }
+
+      .torrent-input::placeholder {
+        color: var(--secondary-text-color);
+      }
+
+      .add-button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        background: var(--primary-color);
+        color: var(--text-primary-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+      }
+
+      .add-button:hover {
+        background: var(--primary-color-dark, var(--primary-color));
+        opacity: 0.9;
+      }
+
+      .file-input-group {
+        display: flex;
+        align-items: center;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .file-input-label {
+        padding: 8px 12px;
+        border: 1px solid var(--divider-color);
+        border-radius: 4px;
+        background: var(--card-background-color);
+        color: var(--primary-text-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        transition: background-color 0.2s, border-color 0.2s;
+        white-space: nowrap;
+      }
+
+      .file-input-label:hover {
+        background: var(--primary-background-color);
+        border-color: var(--primary-color);
+      }
+
+      /* Torrent Action Buttons */
+      .torrent-actions {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+        justify-content: flex-end;
+      }
+
+      .action-btn {
+        padding: 4px 6px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transition: background-color 0.2s;
+        min-width: 28px;
+        height: 24px;
+      }
+
+      .action-btn:hover {
+        opacity: 0.8;
+      }
+
+      .action-btn.pause {
+        background: rgba(255, 152, 0, 0.2);
+        color: #ff9800;
+        border: 1px solid rgba(255, 152, 0, 0.3);
+      }
+
+      .action-btn.resume {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+        border: 1px solid rgba(76, 175, 80, 0.3);
+      }
+
+      .action-btn.remove {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+        border: 1px solid rgba(244, 67, 54, 0.3);
+      }
+
+      .action-btn ha-icon {
+        --mdc-icon-size: 14px;
       }
     `;
   }
