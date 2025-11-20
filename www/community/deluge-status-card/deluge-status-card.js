@@ -262,7 +262,13 @@ class DelugeStatusCard extends LitElement {
         box-shadow: var(--ha-card-box-shadow, 0 2px 2px 0 rgba(0, 0, 0, 0.14));
         overflow: hidden;
         width: 100%;
+        max-width: 100%;
         box-sizing: border-box;
+      }
+      
+      * {
+        box-sizing: border-box;
+        max-width: 100%;
       }
 
       .card-header {
@@ -285,6 +291,7 @@ class DelugeStatusCard extends LitElement {
         padding: 16px;
         overflow: hidden;
         box-sizing: border-box;
+        max-width: 100%;
       }
 
       .status-row {
@@ -434,6 +441,9 @@ class DelugeStatusCard extends LitElement {
         padding: 8px;
         margin-bottom: 6px;
         border-left: 3px solid var(--divider-color);
+        overflow: hidden;
+        max-width: 100%;
+        box-sizing: border-box;
       }
 
       .torrent-item.downloading {
@@ -461,11 +471,18 @@ class DelugeStatusCard extends LitElement {
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 6px;
+        max-width: 100%;
+        overflow: hidden;
+        width: 100%;
       }
 
       .torrent-name-container {
         flex: 1;
         margin-right: 8px;
+        min-width: 0;
+        overflow: hidden;
+        max-width: calc(100% - 80px);
+        width: 0;
       }
 
       .torrent-name {
@@ -476,6 +493,9 @@ class DelugeStatusCard extends LitElement {
         text-overflow: ellipsis;
         white-space: nowrap;
         line-height: 1.2;
+        max-width: 100%;
+        width: 100%;
+        display: block;
       }
 
       .torrent-label {
@@ -495,6 +515,9 @@ class DelugeStatusCard extends LitElement {
         flex-direction: column;
         align-items: flex-end;
         gap: 2px;
+        flex-shrink: 0;
+        min-width: 70px;
+        width: 70px;
       }
 
       .torrent-state {
@@ -552,12 +575,13 @@ class DelugeStatusCard extends LitElement {
 
       .torrent-speeds {
         display: flex;
-        gap: 6px;
-        font-size: 10px;
+        gap: 4px;
+        font-size: 9px;
         color: var(--secondary-text-color);
         flex-shrink: 1;
         min-width: 0;
         overflow: hidden;
+        white-space: nowrap;
       }
 
       .speed-down {
