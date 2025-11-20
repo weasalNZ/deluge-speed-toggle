@@ -42,19 +42,12 @@ class DelugeStatusCard extends LitElement {
         ${this.config.show_title ? html`
           <div class="card-header">
             ${this.config.name}
-            <div class="switch-container">
-              <ha-switch
-                .checked=${entity.state === 'on'}
-                @change=${this._toggle}
-                title="Speed Limit Toggle">
-              </ha-switch>
-            </div>
           </div>
         ` : ''}
         
         <div class="card-content">
-          ${this.renderStatus(entity)}
-          ${this.config.show_speed ? this.renderSpeedSection() : ''}
+          ${this.renderTorrentManagement()}
+          ${this.config.show_speed ? this.renderSpeedSection(entity) : ''}
           ${this.config.show_torrents ? this.renderTorrentSection() : ''}
         </div>
       </ha-card>
@@ -84,47 +77,57 @@ class DelugeStatusCard extends LitElement {
     `;
   }
 
-  renderSpeedSection() {
+  renderSpeedSection(entity) {
     // Try to find speed sensors
     const downloadEntity = this.hass.states['sensor.deluge_download_speed'];
     const uploadEntity = this.hass.states['sensor.deluge_upload_speed'];
     
-    // If sensors don't exist at all
-    if (!downloadEntity || !uploadEntity) {
+    // Check if entity or sensors are unavailable/unknown
+    const isUnavailable = entity.state === 'unavailable' || entity.state === 'unknown' ||
+                          !downloadEntity || !uploadEntity ||
+                          downloadEntity.state === 'unavailable' || uploadEntity.state === 'unavailable';
+    
+    if (isUnavailable) {
       return html`
-        <div class="info-section">
-          <div class="section-title">
-            <ha-icon icon="mdi:speedometer"></ha-icon>
-            Current Speed
+        <div class="compact-speed-section unavailable">
+          <div class="speed-info">
+            <span class="speed-compact">
+              <ha-icon icon="mdi:connection" style="color: #f44336;"></ha-icon>
+              Deluge disconnected
+            </span>
           </div>
-          <div class="unavailable">Speed monitoring sensors not available</div>
+          <div class="toggle-container">
+            <ha-switch
+              .checked=${entity.state === 'on'}
+              .disabled=${true}
+              title="Reconnect Deluge to enable toggle">
+            </ha-switch>
+          </div>
         </div>
       `;
     }
     
-    // Sensors exist, use them even if state is unknown/unavailable
-    // This handles cases where sensors are initializing
-
     const downloadSpeed = this.formatSpeed(downloadEntity.state);
     const uploadSpeed = this.formatSpeed(uploadEntity.state);
     
     return html`
-      <div class="info-section">
-        <div class="section-title">
-          <ha-icon icon="mdi:speedometer"></ha-icon>
-          Current Speed
+      <div class="compact-speed-section">
+        <div class="speed-info">
+          <span class="speed-compact">
+            <ha-icon icon="mdi:download"></ha-icon>
+            ${downloadSpeed}
+          </span>
+          <span class="speed-compact">
+            <ha-icon icon="mdi:upload"></ha-icon>
+            ${uploadSpeed}
+          </span>
         </div>
-        <div class="speed-grid">
-          <div class="speed-item">
-            <ha-icon icon="mdi:download" class="download-icon"></ha-icon>
-            <span class="speed-label">Download</span>
-            <span class="speed-value">${downloadSpeed}</span>
-          </div>
-          <div class="speed-item">
-            <ha-icon icon="mdi:upload" class="upload-icon"></ha-icon>
-            <span class="speed-label">Upload</span>
-            <span class="speed-value">${uploadSpeed}</span>
-          </div>
+        <div class="toggle-container">
+          <ha-switch
+            .checked=${entity.state === 'on'}
+            @change=${this._toggle}
+            title="Speed Limit Toggle">
+          </ha-switch>
         </div>
       </div>
     `;
@@ -180,7 +183,6 @@ class DelugeStatusCard extends LitElement {
           </div>
         </div>
         ${this.renderTorrentList(activeEntity)}
-        ${this.renderTorrentManagement()}
       </div>
     `;
   }
@@ -232,27 +234,43 @@ class DelugeStatusCard extends LitElement {
                      style="width: ${torrent.progress}%"></div>
               </div>
             </div>
-            <div class="torrent-actions">
-              ${torrent.state.toLowerCase() === 'paused' ? html`
-                <button class="action-btn resume" @click=${() => this._resumeTorrent(torrent.hash)} title="Resume">
-                  <ha-icon icon="mdi:play"></ha-icon>
-                </button>
-              ` : html`
-                <button class="action-btn pause" @click=${() => this._pauseTorrent(torrent.hash)} title="Pause">
-                  <ha-icon icon="mdi:pause"></ha-icon>
-                </button>
-              `}
-              <button class="action-btn remove" @click=${() => this._removeTorrent(torrent.hash)} title="Remove">
-                <ha-icon icon="mdi:delete"></ha-icon>
-              </button>
-            </div>
           </div>
         `)}
       </div>
     `;
   }
 
+  formatSpeed(speedKBs) {
+    if (!speedKBs || speedKBs === 'unknown' || speedKBs === 'unavailable' || speedKBs == 0) {
+      return '0 KB/s';
+    }
+    
+    const kbs = parseFloat(speedKBs);
+    if (isNaN(kbs)) return '0 KB/s';
+    if (kbs < 1024) return `${kbs.toFixed(1)} KB/s`;
+    return `${(kbs / 1024).toFixed(1)} MB/s`;
+  }
+
   renderTorrentManagement() {
+    // Check if the switch entity is available
+    const entity = this.hass.states[this.config.entity];
+    const isDisconnected = !entity || entity.state === 'unavailable' || entity.state === 'unknown';
+    
+    if (isDisconnected) {
+      return html`
+        <div class="torrent-management unavailable">
+          <div class="section-title">
+            <ha-icon icon="mdi:plus-circle" style="color: #9e9e9e;"></ha-icon>
+            Add Torrent
+          </div>
+          <div class="disconnected-message">
+            <ha-icon icon="mdi:connection" style="color: #f44336;"></ha-icon>
+            <span>Connect Deluge daemon to add torrents</span>
+          </div>
+        </div>
+      `;
+    }
+    
     return html`
       <div class="torrent-management">
         <div class="section-title">
@@ -290,17 +308,6 @@ class DelugeStatusCard extends LitElement {
     `;
   }
 
-  formatSpeed(speedKBs) {
-    if (!speedKBs || speedKBs === 'unknown' || speedKBs === 'unavailable' || speedKBs == 0) {
-      return '0 KB/s';
-    }
-    
-    const kbs = parseFloat(speedKBs);
-    if (isNaN(kbs)) return '0 KB/s';
-    if (kbs < 1024) return `${kbs.toFixed(1)} KB/s`;
-    return `${(kbs / 1024).toFixed(1)} MB/s`;
-  }
-
   _toggle() {
     this.hass.callService('switch', 'toggle', {
       entity_id: this.config.entity
@@ -322,7 +329,6 @@ class DelugeStatusCard extends LitElement {
       return;
     }
 
-    // Determine if it's a magnet link or URL
     if (value.startsWith('magnet:')) {
       this.hass.callService('deluge_speed_toggle', 'add_torrent', {
         magnet_link: value
@@ -357,77 +363,47 @@ class DelugeStatusCard extends LitElement {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const arrayBuffer = event.target.result;
-      const uint8Array = new Uint8Array(arrayBuffer);
-      const base64String = btoa(String.fromCharCode(...uint8Array));
-      
-      this.hass.callService('deluge_speed_toggle', 'add_torrent', {
-        torrent_data: base64String
-      }).then(() => {
-        this._showNotification('Torrent file uploaded successfully!', 'success');
-        e.target.value = ''; // Clear file input
-      }).catch(err => {
-        this._showNotification('Failed to upload torrent file: ' + err.message, 'error');
-      });
+      try {
+        const arrayBuffer = event.target.result;
+        const bytes = new Uint8Array(arrayBuffer);
+        
+        // Use a safer approach for base64 encoding
+        let binary = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.slice(i, i + chunkSize);
+          binary += String.fromCharCode.apply(null, chunk);
+        }
+        const base64String = btoa(binary);
+        
+        this.hass.callService('deluge_speed_toggle', 'add_torrent', {
+          torrent_data: base64String
+        }).then(() => {
+          this._showNotification('Torrent file uploaded successfully!', 'success');
+          e.target.value = '';
+        }).catch(err => {
+          this._showNotification('Failed to upload torrent file: ' + err.message, 'error');
+        });
+      } catch (error) {
+        this._showNotification('Error processing torrent file: ' + error.message, 'error');
+      }
     };
 
     reader.readAsArrayBuffer(file);
   }
 
-  _pauseTorrent(torrentId) {
-    if (!torrentId) return;
-    
-    this.hass.callService('deluge_speed_toggle', 'pause_torrent', {
-      torrent_id: torrentId
-    }).then(() => {
-      this._showNotification('Torrent paused successfully!', 'success');
-    }).catch(err => {
-      this._showNotification('Failed to pause torrent: ' + err.message, 'error');
-    });
-  }
-
-  _resumeTorrent(torrentId) {
-    if (!torrentId) return;
-    
-    this.hass.callService('deluge_speed_toggle', 'resume_torrent', {
-      torrent_id: torrentId
-    }).then(() => {
-      this._showNotification('Torrent resumed successfully!', 'success');
-    }).catch(err => {
-      this._showNotification('Failed to resume torrent: ' + err.message, 'error');
-    });
-  }
-
-  _removeTorrent(torrentId) {
-    if (!torrentId) return;
-    
-    // Ask for confirmation
-    if (!confirm('Are you sure you want to remove this torrent? Files will NOT be deleted.')) {
-      return;
-    }
-    
-    this.hass.callService('deluge_speed_toggle', 'remove_torrent', {
-      torrent_id: torrentId,
-      remove_data: false
-    }).then(() => {
-      this._showNotification('Torrent removed successfully!', 'success');
-    }).catch(err => {
-      this._showNotification('Failed to remove torrent: ' + err.message, 'error');
-    });
-  }
-
   _showNotification(message, type = 'info') {
-    // Use Home Assistant's toast notification system
-    this.hass.callService('system_log', 'write', {
-      message: `Deluge: ${message}`,
-      level: type === 'error' ? 'error' : 'info'
-    });
+    console.log(`Deluge ${type}: ${message}`);
     
-    // Also try to show browser notification if possible
-    if ('Notification' in window) {
-      new Notification('Deluge Speed Toggle', {
-        body: message,
-        icon: type === 'success' ? 'mdi:check-circle' : type === 'error' ? 'mdi:alert-circle' : 'mdi:information'
+    // Try to use Home Assistant's notification system
+    if (this.hass && this.hass.callService) {
+      this.hass.callService('persistent_notification', 'create', {
+        message: message,
+        title: 'Deluge Speed Toggle',
+        notification_id: 'deluge_' + Date.now()
+      }).catch(() => {
+        // Fallback - just log to console if notification fails
+        console.log(`Deluge notification: ${message}`);
       });
     }
   }
@@ -535,6 +511,64 @@ class DelugeStatusCard extends LitElement {
         flex-direction: column;
         align-items: center;
         gap: 4px;
+      }
+
+      /* Compact Speed Section */
+      .compact-speed-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: var(--primary-background-color);
+        border-radius: 6px;
+        margin-bottom: 16px;
+      }
+
+      .speed-info {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .speed-compact {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 14px;
+        color: var(--primary-text-color);
+      }
+
+      .speed-compact ha-icon {
+        --mdc-icon-size: 14px;
+        color: var(--secondary-text-color);
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+      }
+
+      /* Disconnected/Unavailable States */
+      .compact-speed-section.unavailable {
+        opacity: 0.7;
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid rgba(244, 67, 54, 0.2);
+      }
+
+      .torrent-management.unavailable {
+        opacity: 0.7;
+      }
+
+      .disconnected-message {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--secondary-text-color);
+        font-size: 14px;
+        padding: 8px 12px;
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid rgba(244, 67, 54, 0.2);
+        border-radius: 4px;
       }
 
       .download-icon {
@@ -827,9 +861,9 @@ class DelugeStatusCard extends LitElement {
 
       /* Torrent Management Styles */
       .torrent-management {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid var(--divider-color);
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--divider-color);
       }
 
       .add-torrent-section {
@@ -911,54 +945,6 @@ class DelugeStatusCard extends LitElement {
       .file-input-label:hover {
         background: var(--primary-background-color);
         border-color: var(--primary-color);
-      }
-
-      /* Torrent Action Buttons */
-      .torrent-actions {
-        display: flex;
-        gap: 4px;
-        margin-top: 8px;
-        justify-content: flex-end;
-      }
-
-      .action-btn {
-        padding: 4px 6px;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        transition: background-color 0.2s;
-        min-width: 28px;
-        height: 24px;
-      }
-
-      .action-btn:hover {
-        opacity: 0.8;
-      }
-
-      .action-btn.pause {
-        background: rgba(255, 152, 0, 0.2);
-        color: #ff9800;
-        border: 1px solid rgba(255, 152, 0, 0.3);
-      }
-
-      .action-btn.resume {
-        background: rgba(76, 175, 80, 0.2);
-        color: #4caf50;
-        border: 1px solid rgba(76, 175, 80, 0.3);
-      }
-
-      .action-btn.remove {
-        background: rgba(244, 67, 54, 0.2);
-        color: #f44336;
-        border: 1px solid rgba(244, 67, 54, 0.3);
-      }
-
-      .action-btn ha-icon {
-        --mdc-icon-size: 14px;
       }
     `;
   }
