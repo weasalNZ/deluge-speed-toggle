@@ -1,5 +1,7 @@
 # Deluge Speed Toggle
 
+![Deluge Status Card Example](www/community/deluge-status-card/deluge-status-card-example.png)
+
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
 ## Features
