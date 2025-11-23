@@ -426,43 +426,43 @@
         <div class="card">
             <div class="card-header">
                 Deluge Server
-                <div class="switch-container">
-                    <div class="switch" id="demoSwitch" onclick="toggleMode()">
-                        <div class="switch-thumb"></div>
-                    </div>
-                </div>
             </div>
-            
             <div class="card-content">
-                <div class="status-row">
-                    <div class="status-indicator unlimited" id="statusIndicator">
-                        ♾️
-                    </div>
-                    <div class="status-info">
-                        <div class="status-primary" id="statusPrimary">Unlimited Speed</div>
-                        <div class="status-secondary" id="statusSecondary">No limits</div>
-                    </div>
-                </div>
-                
-                <div class="info-section">
+                <!-- Add Torrent Section -->
+                <div class="info-section" style="margin-bottom: 16px; border-bottom: 1px solid #30363d; padding-bottom: 16px;">
                     <div class="section-title">
-                        <span>🏃</span>
-                        Current Speed
+                        <span>🐢</span>
+                        Add Torrent
                     </div>
-                    <div class="speed-grid">
-                        <div class="speed-item">
-                            <span class="download-icon">⬇️</span>
-                            <span class="speed-label">Download</span>
-                            <span class="speed-value" id="downloadSpeed">2.3 MB/s</span>
-                        </div>
-                        <div class="speed-item">
-                            <span class="upload-icon">⬆️</span>
-                            <span class="speed-label">Upload</span>
-                            <span class="speed-value" id="uploadSpeed">0.8 MB/s</span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" placeholder="Paste magnet link or torrent URL here..." style="flex:1; padding:8px; border-radius:4px; border:1px solid #30363d; background:#161b22; color:#e6edf3;" />
+                        <button style="background:#58a6ff; color:white; border:none; border-radius:4px; padding:8px 12px; cursor:pointer;">➕</button>
+                        <label style="background:#21262d; color:#e6edf3; border:1px solid #30363d; border-radius:4px; padding:8px 12px; cursor:pointer;">
+                            <input type="file" style="display:none;" />
+                            📁 Upload .torrent
+                        </label>
+                    </div>
+                </div>
+                <!-- Compact Speed/Toggle Row -->
+                <div class="compact-speed-section" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#161b22;border-radius:6px;margin-bottom:16px;">
+                    <div class="speed-info" style="display:flex;gap:16px;align-items:center;">
+                        <span class="speed-compact" style="display:flex;align-items:center;gap:4px;font-size:14px;color:#e6edf3;">
+                            <span class="download-icon">⬇️</span> 2.3 MB/s
+                        </span>
+                        <span class="speed-compact" style="display:flex;align-items:center;gap:4px;font-size:14px;color:#e6edf3;">
+                            <span class="upload-icon">⬆️</span> 0.8 MB/s
+                        </span>
+                    </div>
+                    <div class="toggle-container" style="display:flex;align-items:center;gap:6px;">
+                        <span class="turtle-mode-indicator-wrapper" style="display:inline-flex;align-items:center;width:1.8em;min-width:1.8em;justify-content:center;">
+                            <span class="turtle-mode-indicator" id="turtleIcon" style="font-size:16px;">🐢</span>
+                        </span>
+                        <div class="switch on" id="demoSwitch" onclick="toggleMode()">
+                            <div class="switch-thumb"></div>
                         </div>
                     </div>
                 </div>
-                
+                <!-- Torrent Stats & List -->
                 <div class="info-section">
                     <div class="section-title">
                         <span>📁</span>
@@ -482,7 +482,6 @@
                             <span class="stat-label">Seeding</span>
                         </div>
                     </div>
-                    
                     <div class="torrent-list">
                         <div class="torrent-item downloading">
                             <div class="torrent-header">
@@ -601,6 +600,7 @@ show_torrents: true</div>
             const statusIndicator = document.getElementById('statusIndicator');
             const statusPrimary = document.getElementById('statusPrimary');
             const statusSecondary = document.getElementById('statusSecondary');
+            const turtleIcon = document.getElementById('turtleIcon');
             
             if (isLimited) {
                 demoSwitch.classList.add('on');
@@ -609,6 +609,7 @@ show_torrents: true</div>
                 statusIndicator.textContent = '🚶';
                 statusPrimary.textContent = 'Speed Limited';
                 statusSecondary.textContent = '500/100 KB/s';
+                turtleIcon.textContent = '🐢';
             } else {
                 demoSwitch.classList.remove('on');
                 statusIndicator.classList.remove('limited');
@@ -616,6 +617,7 @@ show_torrents: true</div>
                 statusIndicator.textContent = '♾️';
                 statusPrimary.textContent = 'Unlimited Speed';
                 statusSecondary.textContent = 'No limits';
+                turtleIcon.textContent = '';
             }
         }
         
