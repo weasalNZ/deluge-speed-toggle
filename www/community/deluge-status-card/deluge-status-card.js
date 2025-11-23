@@ -97,6 +97,11 @@ class DelugeStatusCard extends LitElement {
             </span>
           </div>
           <div class="toggle-container">
+            ${entity.state === 'on' ? html`
+              <div class="turtle-mode-indicator disabled" title="Turtle Mode: Speed Limited (Disconnected)">
+                🐢
+              </div>
+            ` : ''}
             <ha-switch
               .checked=${entity.state === 'on'}
               .disabled=${true}
@@ -123,6 +128,11 @@ class DelugeStatusCard extends LitElement {
           </span>
         </div>
         <div class="toggle-container">
+          <span class="turtle-mode-indicator-wrapper">
+            <span class="turtle-mode-indicator${entity.state === 'on' ? '' : ' hidden'}" title="Turtle Mode: Speed Limited" aria-hidden="${entity.state === 'on' ? 'false' : 'true'}">
+              🐢
+            </span>
+          </span>
           <ha-switch
             .checked=${entity.state === 'on'}
             @change=${this._toggle}
@@ -546,6 +556,38 @@ class DelugeStatusCard extends LitElement {
       .toggle-container {
         display: flex;
         align-items: center;
+        gap: 6px;
+      }
+
+      .turtle-mode-indicator {
+        font-size: 16px;
+        animation: pulse 2s infinite;
+        filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+      }
+
+      .turtle-mode-indicator.disabled {
+        opacity: 0.5;
+        animation: none;
+      }
+
+      .turtle-mode-indicator-wrapper {
+        display: inline-flex;
+        align-items: center;
+        width: 1.8em;
+        min-width: 1.8em;
+        justify-content: center;
+      }
+
+      .turtle-mode-indicator.hidden {
+        opacity: 0;
+        pointer-events: none;
+        width: 1.5em;
+        display: inline-block;
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
       }
 
       /* Disconnected/Unavailable States */
