@@ -682,32 +682,15 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
                     _LOGGER.info("Detected Deluge is using Preset 2 (Unlimited) - Switch OFF")
                 else:
                     # Current settings don't match either preset
-                    # Check if speeds are limited (not unlimited)
+                    # On startup, do not adapt or update the config. Just log and set state to unknown/off.
                     speeds_are_limited = (current_download != -1 or current_upload != -1)
-                    
                     if speeds_are_limited:
-                        # Deluge has custom limited speeds - adapt Preset 1 to match and set switch ON
-                        self._is_on = True
-                        _LOGGER.info("Detected custom limited speeds in Deluge (Download: %s, Upload: %s) - Setting Switch ON and adapting Preset 1", 
+                        self._is_on = None  # Unknown state
+                        _LOGGER.info("Detected custom limited speeds in Deluge (Download: %s, Upload: %s) - Switch state unknown, will not adapt preset on startup", 
                                    current_download, current_upload)
-                        
-                        # Update our internal preset 1 to match current Deluge settings
-                        # This allows the switch to work with whatever speeds are currently set
-                        self.config[CONF_PRESET1_DOWNLOAD] = current_download
-                        self.config[CONF_PRESET1_UPLOAD] = current_upload
-                        
-                        # Log the adaptation
-                        _LOGGER.info("Adapted Preset 1 to match current Deluge settings: Download=%s KiB/s, Upload=%s KiB/s", 
-                                   current_download, current_upload)
-                        
-                        # Save the adapted preset to config entry for persistence
-                        await self._save_adapted_preset(current_download, current_upload)
-                        
                     else:
-                        # Speeds are unlimited (-1, -1) but don't match preset 2 exactly (shouldn't happen)
                         self._is_on = False
                         _LOGGER.info("Detected unlimited speeds - Switch OFF")
-                
                 # Update Home Assistant state
                 self.async_write_ha_state()
                 
