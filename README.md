@@ -1,7 +1,5 @@
 # Deluge Speed Toggle
 
-![Deluge Status Card Example](www/community/deluge-status-card/deluge-status-card-example.png)
-
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
 ## Features
@@ -200,6 +198,36 @@ data:
 3. Check if Deluge host is overloaded
 4. Consider using hostname instead of IP (or vice versa)
 
+## Entity Naming Issue & Recreating Entity IDs
+
+If your Deluge Speed Toggle entities (sensors or switch) have numbers at the end of their names (e.g., `sensor.deluge_active_torrents_2`), the card may not work as expected because it expects the following entity IDs:
+
+- `sensor.deluge_active_torrents`
+- `sensor.deluge_download_speed`
+- `switch.deluge_speed_toggle`
+- `sensor.deluge_status`
+- `sensor.deluge_torrent_count`
+- `sensor.deluge_upload_speed`
+
+This can happen if you have removed and re-added the integration, or if Home Assistant has created duplicate entities.
+
+**To fix this:**
+1. Go to **Settings > Devices & Services**
+2. Find **Deluge Speed Toggle** and click the arrow next to your Deluge Server
+3. Click the three dots (⋮) in the top right corner
+4. Select **Recreate Entity IDs**
+5. Confirm and restart Home Assistant if prompted
+
+This will reset the entity IDs to their default names, allowing the card to work correctly.
+
+## Troubleshooting: Entity ID Error Example
+
+If your Deluge Status Card does not display correctly and you notice that entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), it may look similar to the screenshot below:
+
+![Deluge Status Card Entity ID Error](www/community/deluge-status-card/deluge-status-card-entity-id-error.png)
+
+This usually means the card cannot find the expected entities. See the troubleshooting section above for steps to recreate entity IDs and resolve this issue.
+
 ## Logging
 
 The component provides detailed logging for troubleshooting. Enable debug logging in `configuration.yaml`:
@@ -294,6 +322,16 @@ This integration includes a beautiful custom Lovelace card for enhanced visualiz
 | `show_title` | `true` | Show/hide the card header |
 | `show_speed` | `true` | Show/hide current speed section |
 | `show_torrents` | `true` | Show/hide torrent statistics |
+
+## Example Card Screenshot
+
+Below is an example of the Deluge Status Card in action:
+
+![Deluge Status Card Example](www/community/deluge-status-card/deluge-status-card-example.png)
+
+> The card displays torrent status, speed, and connection state. In this example, Deluge is disconnected, but the card still shows torrent statistics and history.
+
+---
 
 ## Development
 
