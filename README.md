@@ -1,3 +1,9 @@
+> **Note:** Home Assistant now serves HACS-managed frontend files from `/www/hacsfiles/` instead of `/www/community/`. Update your resource paths accordingly.
+> 
+> **[31st December 2025] Folder structure updated:**
+> - All files previously under `/www/community/deluge-status-card/` are now under `/www/hacsfiles/deluge-status-card/`.
+> - Error screenshot and example image paths updated accordingly.
+
 # Deluge Speed Toggle
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
@@ -224,7 +230,7 @@ This will reset the entity IDs to their default names, allowing the card to work
 
 If your Deluge Status Card does not display correctly and you notice that entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), it may look similar to the screenshot below:
 
-![Deluge Status Card Entity ID Error](www/community/deluge-status-card/deluge-status-card-entity-id-error.png)
+![Deluge Status Card Entity ID Error](www/hacsfiles/deluge-status-card/deluge-status-card-entity-id-error.png)
 
 This usually means the card cannot find the expected entities. See the troubleshooting section above for steps to recreate entity IDs and resolve this issue.
 
@@ -295,12 +301,12 @@ This integration includes a beautiful custom Lovelace card for enhanced visualiz
 
 1. **Copy the card file** to your Home Assistant:
    ```
-   /config/www/community/deluge-status-card/deluge-status-card.js
+   /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
    ```
 
 2. **Add resource** in Home Assistant:
    - Go to **Settings → Dashboards → Resources**
-   - Add resource: `/local/community/deluge-status-card/deluge-status-card.js` (JavaScript Module)
+   - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (JavaScript Module)
 
 3. **Add card** to your dashboard:
    ```yaml
@@ -327,7 +333,7 @@ This integration includes a beautiful custom Lovelace card for enhanced visualiz
 
 Below is an example of the Deluge Status Card in action:
 
-![Deluge Status Card Example](www/community/deluge-status-card/deluge-status-card-example.png)
+![Deluge Status Card Example](www/hacsfiles/deluge-status-card/deluge-status-card-example.png)
 
 > The card displays torrent status, speed, and connection state. In this example, Deluge is disconnected, but the card still shows torrent statistics and history.
 
@@ -348,7 +354,7 @@ deluge_speed_toggle/
 │   ├── sensor.py                # Monitoring sensors
 │   ├── speed_toggle.py          # Switch entity and service logic
 │   └── switch.py                # Switch platform
-├── www/community/deluge-status-card/
+├── www/hacsfiles/deluge-status-card/
 │   └── deluge-status-card.js    # Custom Lovelace card
 ├── deluge-status-card-preview.html # Card design preview
 └── README.md                    # This file
