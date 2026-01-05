@@ -98,14 +98,14 @@ All speeds are specified in **KiB/s** (kilobytes per second):
 
   To install the Deluge Status custom Lovelace card in Home Assistant:
 
-  1. **Copy the card file** to your Home Assistant:
+  1. **Copy the card file to your Home Assistant:**
      ```
      /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
      ```
-  2. **Add the resource** in Home Assistant:
+  2. **Add the resource in Home Assistant:**
      - Go to **Settings → Dashboards → Resources**
      - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
-  3. **Add the card** to your dashboard:
+  3. **Add the card to your dashboard:**
      ```yaml
      type: custom:deluge-status-card
      entity: switch.deluge_speed_toggle
