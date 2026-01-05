@@ -67,6 +67,8 @@ Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent 
 5. Search for **Deluge Speed Toggle**
 6. Click **Download** and follow the prompts
 7. Restart Home Assistant
+8. Go to **Settings → Devices & Services → Add Integration**
+9. Search for **Deluge Speed Toggle** and add it
 
 ---
 ### Method 2: Manual Installation
@@ -99,13 +101,10 @@ You can install the custom component manually using either of the following opti
   > This will download the latest version and place it in the correct directory. Adjust the path if your Home Assistant config is elsewhere.
 
 2. Restart Home Assistant
+3. Go to **Settings → Devices & Services → Add Integration**
+4. Search for **Deluge Speed Toggle** and add it
 
 ---
-## Installing the Intergration
-
-After completing either installation method above, add the integration:
-
-Go to **Settings → Devices & Services → Add Integration**, then search for **Deluge Speed Toggle** and add it.
 
 When you add the integration, you'll be prompted to enter:
 #### Connection Settings
