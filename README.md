@@ -311,7 +311,7 @@ This integration includes a beautiful custom Lovelace card for enhanced visualiz
 3. **Add card** to your dashboard:
    ```yaml
    type: custom:deluge-status-card
-   entity: switch.deluge_speed_toggle_localhost_8112_switch
+   entity: switch.deluge_speed_toggle
    name: "Deluge Server"
    show_speed: true
    show_torrents: true
