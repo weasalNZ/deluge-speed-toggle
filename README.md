@@ -5,25 +5,12 @@
 > - Error screenshot and example image paths updated accordingly.
 
 
+
 # Deluge Speed Toggle
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
 ---
-
-## 🚀 Quick Start / Installation
-
-### Method 1: HACS (Recommended)
-1. **Add Custom Repository** in HACS:
-  - Go to HACS → Integrations → ⋮ (three dots) → Custom repositories
-  - Add URL: `https://github.com/weasalNZ/deluge-speed-toggle`
-  - Category: Integration
-  - Click "Add"
-2. **Install via HACS**:
-  - Search for "Deluge Speed Toggle" in HACS Integrations
-  - Click "Download"
-  - Restart Home Assistant
-3. **Add Integration**:
 
   # Deluge Speed Toggle
 
