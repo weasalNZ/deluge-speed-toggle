@@ -1,12 +1,14 @@
+
 # Deluge Speed Toggle
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
+## :notebook_with_decorative_cover: Table of Contents
 
 - [Requirements](#requirements)
-- [Features & Overview](#features--overview)
-- [Screenshots](#camera-screenshots)
-- [Quick Start / Installation](#quick-start--installation)
+- [:sparkles: Features & Overview](#sparkles-features--overview)
+- [:camera: Example Card Screenshot](#camera-example-card-screenshot)
+- [:rocket: Quick Start / Installation](#rocket-quick-start--installation)
   - [HACS (Recommended)](#method-1-hacs-recommended)
   - [Manual Installation](#method-2-manual-installation)
 - [Configuration Wizard](#configuration-wizard)
@@ -16,26 +18,24 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
-# :notebook_with_decorative_cover: Table of Contents
+- [Support & Links](#support--links)
+- [License](#license)
+- [Version History](#version-history)
 
-[:sparkles: Features & Overview](#features--overview)
-[:framed_picture: Example Card Screenshot](#example-card-screenshot)
-[:rocket: Quick Start / Installation](#quick-start--installation)
-
-## ✨ Features & Overview
+## :sparkles: Features & Overview
 
 
 ---
 
 <!-- Screenshots -->
-### :camera: Screenshots
+## :camera: Example Card Screenshot
 
 ![Deluge Status Card Example](www/hacsfiles/deluge-status-card/deluge-status-card-example.png)
 > The card displays torrent status, speed, and connection state. In this example, Deluge is disconnected, but the card still shows torrent statistics and history.
 
 ---
 
-## 🚀 Quick Start / Installation
+## :rocket: Quick Start / Installation
 
 ### Method 1: HACS (Recommended)
 1. **Add Custom Repository** in HACS:
