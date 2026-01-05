@@ -6,17 +6,9 @@
 
 
 
-# Deluge Speed Toggle
 
-A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
 ---
-
-  # Deluge Speed Toggle
-
-  A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
-
-  ---
 
   ## ✨ Features & Overview
 
