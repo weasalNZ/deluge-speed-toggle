@@ -1,13 +1,15 @@
+
+# Deluge Speed Toggle
+
+A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
+
+---
+
 > **Note:** Home Assistant now serves HACS-managed frontend files from `/www/hacsfiles/` instead of `/www/community/`. Update your resource paths accordingly.
-> 
+>
 > **[31st December 2025] Folder structure updated:**
 > - All files previously under `/www/community/deluge-status-card/` are now under `/www/hacsfiles/deluge-status-card/`.
 > - Error screenshot and example image paths updated accordingly.
-
-
-
-
-
 ---
 
   ## ✨ Features & Overview
