@@ -130,14 +130,29 @@ You can edit these options later by clicking the integration in Home Assistant a
 
   To install the Deluge Status custom Lovelace card in Home Assistant:
 
+### Method 1: Manual Copy
 1. **Copy the card file to your Home Assistant:**
-    ```
+
     /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
+
+### Method 2: Terminal Download (curl)
+1. **Download the card file using curl:**
+
+    ```sh
+    mkdir -p /config/www/hacsfiles/deluge-status-card
+    curl -L -o /config/www/hacsfiles/deluge-status-card/deluge-status-card.js \
+      https://raw.githubusercontent.com/weasalNZ/deluge-speed-toggle/main/www/hacsfiles/deluge-status-card/deluge-status-card.js
     ```
+
+    > This command works on Home Assistant OS, Supervised, and inside the Home Assistant Docker container. If you are running Home Assistant in Docker, run this command inside your container (e.g., `docker exec -it homeassistant bash`).
+    > If the directory does not exist, the first command will create it.
+
 2. **Add the resource in Home Assistant:**
     - Go to **Settings → Dashboards → Resources**
     - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+
 3. **Add the card to your dashboard:**
+
     ```yaml
     type: custom:deluge-status-card
     entity: switch.deluge_speed_toggle
@@ -248,13 +263,6 @@ logger:
     custom_components.deluge_speed: debug
 ```
 Then check logs in Home Assistant UI: **Settings → System → Logs**
-
-### Switch Not Responding
-- Check Home Assistant logs for errors (Settings → System → Logs)
-- Ensure Deluge is running and reachable
-- Verify network connectivity between Home Assistant and Deluge
-- Restart Home Assistant
-
 
 ### Logging
 Enable debug logging in `configuration.yaml` for more details:
