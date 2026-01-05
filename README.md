@@ -6,21 +6,31 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 ## :notebook_with_decorative_cover: Table of Contents
 
 - [Requirements](#requirements)
-- [:sparkles: Features & Overview](#sparkles-features--overview)
-- [:camera: Example Card Screenshot](#camera-example-card-screenshot)
-- [:rocket: Quick Start / Installation](#rocket-quick-start--installation)
-  - [HACS (Recommended)](#method-1-hacs-recommended)
-  - [Manual Installation](#method-2-manual-installation)
-- [Configuration Wizard](#configuration-wizard)
-- [Speed Units](#speed-units)
-- [Installation: Custom Lovelace Card](#installation-custom-lovelace-card)
-- [Card Configuration Options](#card-configuration-options)
-- [Usage](#usage)
-- [Troubleshooting](#troubleshooting)
-- [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
-- [Support & Links](#support--links)
+- [Features & Overview](#sparkles-features--overview)
+ - [Example Card Screenshot](#camera-example-card-screenshot)
+ - [Quick Start / Installation](#rocket-quick-start--installation)
+ - [Configuration Wizard](#configuration-wizard)
+ - [Speed Units](#speed-units)
+ - [Installation: Custom Lovelace Card](#installation-custom-lovelace-card)
+ - [Card Configuration Options](#card-configuration-options)
+ - [Usage](#usage)
+ - [Troubleshooting](#troubleshooting)
+ - [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
+ - [Support & Links](#support--links)
+ - [License](#license)
+ - [Version History](#version-history)
 - [License](#license)
 - [Version History](#version-history)
+## :sparkles: Features & Overview
+
+- 🎚️ **Easy Toggle Switch**: One-click switching between two speed presets in the Home Assistant UI
+- ⚙️ **Customizable Presets**: Set your own download and upload speed limits for each preset
+- 📊 **Both Upload & Download Control**: Adjust both directions simultaneously
+- 🔒 **Secure**: Password-protected connection to Deluge
+- 📝 **Logging**: Comprehensive logging for troubleshooting
+- ✅ **Connection Validation**: Tests Deluge connection before saving configuration
+- 📈 **Real-time Monitoring**: Optional sensors for download/upload speeds and torrent statistics
+- 🎨 **Custom Lovelace Card**: Beautiful status card with speed control and torrent overview
 
 ## :sparkles: Features & Overview
 
