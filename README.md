@@ -24,6 +24,16 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 
 ---
 
+
+## Requirements
+
+- Home Assistant 2022.0 or newer
+- Deluge BitTorrent client (v2.x recommended) with Web UI enabled
+- Deluge Web UI password (required for authentication)
+- HACS (Home Assistant Community Store) for easy installation (optional, but recommended)
+
+---
+
 ## :sparkles: Features & Overview
 
 Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent client between two speed presets (e.g., "Limited" and "Unlimited") directly from Home Assistant. This is ideal for:
@@ -113,28 +123,31 @@ All speeds are specified in **KiB/s** (kilobytes per second):
   - `-1` = Unlimited
 
   ---
+You can edit these options later by clicking the integration in Home Assistant and selecting "Configure".
+
 
   ## Installation: Custom Lovelace Card
 
   To install the Deluge Status custom Lovelace card in Home Assistant:
 
   1. **Copy the card file to your Home Assistant:**
-     ```
-     /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
-     ```
+  
+    ```
+    /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
+    ```
 
   2. **Add the resource in Home Assistant:**
-     - Go to **Settings → Dashboards → Resources**
-     - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+    - Go to **Settings → Dashboards → Resources**
+    - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
 
   3. **Add the card to your dashboard:**
-     ```yaml
-     type: custom:deluge-status-card
-     entity: switch.deluge_speed_toggle
-     name: "Deluge Server"
-     show_speed: true
-     show_torrents: true
-     ```
+    ```yaml
+    type: custom:deluge-status-card
+    entity: switch.deluge_speed_toggle
+    name: "Deluge Server"
+    show_speed: true
+    show_torrents: true
+    ```
   ## Card Configuration Options
 
   | Option         | Default         | Description                                 |
@@ -189,6 +202,51 @@ automation:
 - Double-check your Deluge web UI password
 - Avoid special characters that may cause issues
 - Restart Deluge and try again
+## Troubleshooting
+
+### Cannot Connect to Deluge
+**Error:** "Cannot connect to Deluge" appears during setup
+- Verify Deluge is running and accessible on the network
+- Test with: `curl -X POST http://DELUGE_HOST:8112/json`
+- Confirm the correct web UI password is used
+- Make sure Deluge's JSON-RPC API is enabled
+
+### Authentication Failed
+**Error:** "Deluge authentication failed: Invalid password"
+- Double-check your Deluge web UI password
+- Avoid special characters that may cause issues
+- Restart Deluge and try again
+
+### Switch Not Responding
+- Check Home Assistant logs for errors (Settings → System → Logs)
+- Ensure Deluge is running and reachable
+- Verify network connectivity between Home Assistant and Deluge
+- Restart Home Assistant
+
+### Card Not Displaying or Entity ID Issues
+- Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`)
+- If entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), recreate entity IDs in Home Assistant:
+  1. Go to **Settings > Devices & Services**
+  2. Find **Deluge Speed Toggle** and click the arrow next to your Deluge Server
+  3. Click the three dots (⋮) in the top right corner
+  4. Select **Recreate Entity IDs**
+  5. Restart Home Assistant if prompted
+
+#### Example: Entity ID Error
+If your Deluge Status Card does not display correctly and you notice that entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), it may look similar to the screenshot below:
+
+![Deluge Status Card Entity ID Error](www/hacsfiles/deluge-status-card/deluge-status-card-entity-id-error.png)
+
+This usually means the card cannot find the expected entities. See the steps above to recreate entity IDs and resolve this issue.
+
+### Logging
+Enable debug logging in `configuration.yaml` for more details:
+```yaml
+logger:
+  logs:
+    custom_components.deluge_speed: debug
+```
+Then check logs in Home Assistant UI: **Settings → System → Logs**
 
 ### Switch Not Responding
 - Check Home Assistant logs for errors (Settings → System → Logs)
