@@ -22,8 +22,24 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 - [License](#license)
 - [Version History](#version-history)
 
+---
+
 ## :sparkles: Features & Overview
 
+Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent client between two speed presets (e.g., "Limited" and "Unlimited") directly from Home Assistant. This is ideal for:
+
+- Instantly throttling or unthrottling your downloads/uploads
+- Automating speed changes based on time of day or network conditions
+- Integrating Deluge speed control into your Home Assistant dashboards and automations
+
+**Key Features:**
+
+- 🟢 **Toggle Switch**: One Home Assistant switch entity to toggle between two speed presets
+- ⚡ **Fast**: Changes take effect immediately in Deluge
+- 🛠️ **Configurable**: Set your own speed limits for each preset (including unlimited)
+- 🔒 **Secure**: Uses Deluge's built-in authentication
+- 📊 **Status Card**: Optional Lovelace card shows current speeds, status, and torrent stats
+- 🔄 **Automation Ready**: Use in Home Assistant automations and scripts
 
 ---
 
