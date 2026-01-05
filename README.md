@@ -2,77 +2,81 @@
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
-  ## ✨ Features & Overview
 
-  - 🎚️ **Easy Toggle Switch**: One-click switching between two speed presets in the Home Assistant UI
-  - ⚙️ **Customizable Presets**: Set your own download and upload speed limits for each preset
-  - 📊 **Both Upload & Download Control**: Adjust both directions simultaneously
-  - 🔒 **Secure**: Password-protected connection to Deluge
-  - 📝 **Logging**: Comprehensive logging for troubleshooting
-  - ✅ **Connection Validation**: Tests Deluge connection before saving configuration
-  - 📈 **Real-time Monitoring**: Optional sensors for download/upload speeds and torrent statistics
-  - 🎨 **Custom Lovelace Card**: Beautiful status card with speed control and torrent overview
+- [Requirements](#requirements)
+- [Features & Overview](#features--overview)
+- [Screenshots](#camera-screenshots)
+- [Quick Start / Installation](#quick-start--installation)
+  - [HACS (Recommended)](#method-1-hacs-recommended)
+  - [Manual Installation](#method-2-manual-installation)
+- [Configuration Wizard](#configuration-wizard)
+- [Speed Units](#speed-units)
+- [Installation: Custom Lovelace Card](#installation-custom-lovelace-card)
+- [Card Configuration Options](#card-configuration-options)
+- [Usage](#usage)
+- [Troubleshooting](#troubleshooting)
+- [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
+# :notebook_with_decorative_cover: Table of Contents
 
-  ---
+[:sparkles: Features & Overview](#features--overview)
+[:framed_picture: Example Card Screenshot](#example-card-screenshot)
+[:rocket: Quick Start / Installation](#quick-start--installation)
 
-  ## 🖼️ Example Card Screenshot
+## ✨ Features & Overview
 
-  ![Deluge Status Card Example](www/hacsfiles/deluge-status-card/deluge-status-card-example.png)
-  > The card displays torrent status, speed, and connection state. In this example, Deluge is disconnected, but the card still shows torrent statistics and history.
 
-  ---
+---
 
-  ## 🚀 Quick Start / Installation
+<!-- Screenshots -->
+### :camera: Screenshots
 
-  ### Method 1: HACS (Recommended)
-  1. **Add Custom Repository** in HACS:
-     - Go to HACS → Integrations → ⋮ (three dots) → Custom repositories
-     - Add URL: `https://github.com/weasalNZ/deluge-speed-toggle`
-     - Category: Integration
-     - Click "Add"
-  2. **Install via HACS**:
-     - Search for "Deluge Speed Toggle" in HACS Integrations
-     - Click "Download"
-     - Restart Home Assistant
-  3. **Add Integration**:
-     - Go to Settings → Devices & Services
-     - Click "Add Integration"
-     - Search for "Deluge Speed Toggle"
+![Deluge Status Card Example](www/hacsfiles/deluge-status-card/deluge-status-card-example.png)
+> The card displays torrent status, speed, and connection state. In this example, Deluge is disconnected, but the card still shows torrent statistics and history.
 
-  ### Method 2: Manual Installation
-  **Requirements:**
-  - Home Assistant (Core 2024.1.0 or later)
-  - Deluge torrent client with JSON-RPC API enabled
-  - Network access to Deluge from Home Assistant
+---
 
-  **Setup Steps:**
-  1. Copy the component files to your Home Assistant `custom_components` directory:
-     ```
-     ~/.homeassistant/custom_components/deluge_speed_toggle/
-     ├── __init__.py
-     ├── config_flow.py
-     ├── const.py
-     ├── manifest.json
-     ├── services.yaml
-     ├── speed_toggle.py
-     ├── switch.py
-     └── README.md
-     ```
-  2. Restart Home Assistant to load the custom component
+## 🚀 Quick Start / Installation
 
-  ---
+### Method 1: HACS (Recommended)
+1. **Add Custom Repository** in HACS:
+   - Go to HACS → Integrations → ⋮ (three dots) → Custom repositories
+   - Add URL: `https://github.com/weasalNZ/deluge-speed-toggle`
+   - Category: Integration
+   - Click "Add"
+2. **Install via HACS**:
+   - Search for "Deluge Speed Toggle" in HACS Integrations
+   - Click "Download"
+   - Restart Home Assistant
 
-### Configuration Wizard
+
+### Method 2: Manual Installation
+
+**Setup Steps:**
+1. Copy the component files to your Home Assistant `custom_components` directory:
+   ```
+   ~/.homeassistant/custom_components/deluge_speed_toggle/
+   ├── __init__.py
+   ├── config_flow.py
+   ├── const.py
+   ├── manifest.json
+   ├── services.yaml
+   ├── speed_toggle.py
+   ├── switch.py
+   └── README.md
+   ```
+2. Restart Home Assistant to load the custom component
+
+---
+**Add Integration**:
+   - Go to Settings → Devices & Services
+   - Search for "Deluge Speed Toggle"
 
 When you add the integration, you'll be prompted to enter:
-
 #### Connection Settings
 - **Host**: IP address or hostname of your Deluge server (default: `localhost`)
 - **Port**: Deluge web UI port (default: `8112`)
 - **Password**: Deluge web UI password (required)
 
-#### Speed Presets
-- **Preset 1 Name**: Label for the first preset (default: "Limited")
   - **Download Speed**: Download limit in KiB/s (default: `500`)
   - **Upload Speed**: Upload limit in KiB/s (default: `100`)
 
@@ -115,9 +119,6 @@ All speeds are specified in **KiB/s** (kilobytes per second):
      show_speed: true
      show_torrents: true
      ```
-
-  4. **Preview the card design** by opening `deluge-status-card-preview.html` in your browser.
-
   ## Card Configuration Options
 
   | Option         | Default         | Description                                 |
@@ -144,11 +145,8 @@ You can automate speed changes with Home Assistant automations:
 ```yaml
 automation:
   - alias: "Limit Deluge at night"
-    trigger:
-      platform: time
       at: "22:00:00"
     action:
-      service: switch.turn_off
       entity_id: switch.deluge_speed_toggle
 
   - alias: "Unlimited Deluge in morning"
@@ -159,28 +157,13 @@ automation:
       service: switch.turn_on
       entity_id: switch.deluge_speed_toggle
 ```
-
-### Using the Service Call
-You can also make direct service calls for fine-grained control:
-- **Service**: `deluge_speed.set_speed`
-- **Parameters**:
-  - `download`: Download speed in KiB/s (`-1` for unlimited)
   - `upload`: Upload speed in KiB/s (`-1` for unlimited)
 - **Example**:
 ```yaml
-service: deluge_speed.set_speed
-data:
-  download: 2000
   upload: 500
 ```
-
-## Troubleshooting
-
-### Connection Failed
 **Error:** "Cannot connect to Deluge" appears during setup
 - Verify Deluge is running and accessible on the network
-- Check the host and port settings
-- Ensure the port is not blocked by a firewall
 - Test with: `curl -X POST http://DELUGE_HOST:8112/json`
 - Confirm the correct web UI password is used
 - Make sure Deluge's JSON-RPC API is enabled
@@ -234,17 +217,11 @@ curl -X POST http://<DELUGE_HOST>:8112/json \
     "method": "auth.login",
     "params": ["your-password"],
     "id": 1
-  }'
-```
-
 **Set Speeds Example:**
 ```bash
 curl -X POST http://<DELUGE_HOST>:8112/json \
   -H "Content-Type: application/json" \
   -d '{
-    "method": "core.set_config",
-    "params": [{
-      "max_download_speed": 500,
       "max_upload_speed": 100
     }],
     "id": 2
