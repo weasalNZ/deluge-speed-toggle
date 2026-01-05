@@ -220,14 +220,15 @@ automation:
 - Verify network connectivity between Home Assistant and Deluge
 - Restart Home Assistant
 
+
 ### Card Not Displaying or Entity ID Issues
-- Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`)
+- Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`).
 - If entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), recreate entity IDs in Home Assistant:
-  1. Go to **Settings > Devices & Services**
-  2. Find **Deluge Speed Toggle** and click the arrow next to your Deluge Server
-  3. Click the three dots (⋮) in the top right corner
-  4. Select **Recreate Entity IDs**
-  5. Restart Home Assistant if prompted
+    1. Go to **Settings > Devices & Services**
+    2. Find **Deluge Speed Toggle** and click the arrow next to your Deluge Server
+    3. Click the three dots (⋮) in the top right corner
+    4. Select **Recreate Entity IDs**
+    5. Restart Home Assistant if prompted
 
 #### Example: Entity ID Error
 If your Deluge Status Card does not display correctly and you notice that entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), it may look similar to the screenshot below:
