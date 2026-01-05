@@ -10,12 +10,7 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 - [Quick Start / Installation](#rocket-quick-start--installation)
   - [Method 1: HACS (Recommended)](#method-1-hacs-recommended)
   - [Method 2: Manual Installation](#method-2-manual-installation)
-- [Configuration Wizard](#configuration-wizard)
-- [Speed Units](#speed-units)
-- [Installation: Custom Lovelace Card](#installation-custom-lovelace-card)
-- [Card Configuration Options](#card-configuration-options)
-- [Adding the Resource in Home Assistant](#adding-the-resource-in-home-assistant)
-- [Usage](#usage)
+ [Installing the Integration](#installing-the-integration)
 - [Troubleshooting](#troubleshooting)
 - [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
 - [Support & Links](#support--links)
@@ -61,22 +56,64 @@ Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent 
 
 ---
 
+
 ## :rocket: Quick Start / Installation
 
+### Method 1: HACS (Recommended)
+1. Go to **HACS → Integrations → ⋮ (three dots) → Custom repositories**
+2. Add repository URL: `https://github.com/weasalNZ/deluge-speed-toggle` and select **Integration** as the category
+3. Click **Add**
+4. Go to **HACS → Integrations**
+5. Search for **Deluge Speed Toggle**
+6. Click **Download** and follow the prompts
+7. Restart Home Assistant
+
 ---
-**Add Integration**:
-   - Go to Settings → Devices & Services
-   - Search for "Deluge Speed Toggle"
+### Method 2: Manual Installation
+
+You can install the custom component manually using either of the following options:
+
+**Option A: Manual Copy**
+1. Copy the `deluge_speed_toggle` folder to your Home Assistant `custom_components` directory:
+  ```
+  ~/.homeassistant/custom_components/deluge_speed_toggle/
+  ├── __init__.py
+  ├── config_flow.py
+  ├── const.py
+  ├── manifest.json
+  ├── services.yaml
+  ├── speed_toggle.py
+  ├── switch.py
+  └── README.md
+  ```
+
+**Option B: Terminal Download (curl)**
+1. Download and extract the component using curl and unzip:
+  ```sh
+  cd ~/.homeassistant/custom_components
+  curl -L -o deluge_speed_toggle.zip https://github.com/weasalNZ/deluge-speed-toggle/archive/refs/heads/main.zip
+  unzip -o deluge_speed_toggle.zip 'deluge-speed-toggle-main/custom_components/deluge_speed_toggle/*' -d .
+  mv deluge-speed-toggle-main/custom_components/deluge_speed_toggle ./deluge_speed_toggle
+  rm -rf deluge_speed_toggle.zip deluge-speed-toggle-main
+  ```
+  > This will download the latest version and place it in the correct directory. Adjust the path if your Home Assistant config is elsewhere.
+
+2. Restart Home Assistant
+
+---
+## Installing the Intergration
+
+After completing either installation method above, add the integration:
+
+Go to **Settings → Devices & Services → Add Integration**, then search for **Deluge Speed Toggle** and add it.
 
 When you add the integration, you'll be prompted to enter:
 #### Connection Settings
 - **Host**: IP address or hostname of your Deluge server (default: `localhost`)
 - **Port**: Deluge web UI port (default: `8112`)
 - **Password**: Deluge web UI password (required)
-
   - **Download Speed**: Download limit in KiB/s (default: `500`)
   - **Upload Speed**: Upload limit in KiB/s (default: `100`)
-
 - **Preset 2 Name**: Label for the second preset (default: "Unlimited")
   - **Download Speed**: Download limit in KiB/s (default: `-1` for unlimited)
   - **Upload Speed**: Upload limit in KiB/s (default: `-1` for unlimited)
@@ -99,24 +136,37 @@ You can edit these options later by clicking the integration in Home Assistant a
 
   ## Installation: Custom Lovelace Card
 
-  To install the Deluge Status custom Lovelace card in Home Assistant:
+  To install the Deluge Status custom Lovelace card in Home Assistant, choose one of the following methods:
 
-### Method 1: Manual Copy
-1. **Copy the card file to your Home Assistant:**
-   
-   /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
+  ### Method 1: HACS (Recommended)
+  1. Go to **HACS → Frontend → ⋮ (three dots) → Custom repositories**
+  2. Add repository URL: `https://github.com/weasalNZ/deluge-speed-toggle` and select **Lovelace** as the category
+  3. Click **Add**
+  4. Go to **HACS → Frontend → Explore & Download Repositories**
+  5. Search for **Deluge Status Card**
+  6. Click **Download** and follow the prompts
+  7. Restart Home Assistant if prompted
 
-### Method 2: Terminal Download (curl)
-1. **Download the card file using curl:**
-   ```sh
-   mkdir -p /config/www/hacsfiles/deluge-status-card
-   curl -L -o /config/www/hacsfiles/deluge-status-card/deluge-status-card.js \
-     https://raw.githubusercontent.com/weasalNZ/deluge-speed-toggle/main/www/hacsfiles/deluge-status-card/deluge-status-card.js
-   ```
-   > This command works on Home Assistant OS, Supervised, and inside the Home Assistant Docker container. If you are running Home Assistant in Docker, run this command inside your container (e.g., `docker exec -it homeassistant bash`).
-   > If the directory does not exist, the first command will create it.
 
----
+  ### Method 2: Manual Installation
+
+  You can add the Lovelace card manually using either of the following options:
+
+  **Option A: Manual Copy**
+  1. Copy the card file to your Home Assistant:
+    /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
+
+  **Option B: Terminal Download (curl)**
+  1. Download the card file using curl:
+    ```sh
+    mkdir -p /config/www/hacsfiles/deluge-status-card
+    curl -L -o /config/www/hacsfiles/deluge-status-card/deluge-status-card.js \
+      https://raw.githubusercontent.com/weasalNZ/deluge-speed-toggle/main/www/hacsfiles/deluge-status-card/deluge-status-card.js
+    ```
+    > This command works on Home Assistant OS, Supervised, and inside the Home Assistant Docker container. If you are running Home Assistant in Docker, run this command inside your container (e.g., `docker exec -it homeassistant bash`).
+    > If the directory does not exist, the first command will create it.
+
+  ---
 
 ## Adding the Resource in Home Assistant
 
