@@ -102,9 +102,11 @@ All speeds are specified in **KiB/s** (kilobytes per second):
      ```
      /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
      ```
+
   2. **Add the resource in Home Assistant:**
      - Go to **Settings → Dashboards → Resources**
      - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+
   3. **Add the card to your dashboard:**
      ```yaml
      type: custom:deluge-status-card
@@ -113,6 +115,7 @@ All speeds are specified in **KiB/s** (kilobytes per second):
      show_speed: true
      show_torrents: true
      ```
+
   4. **Preview the card design** by opening `deluge-status-card-preview.html` in your browser.
 
   ## Card Configuration Options
@@ -262,5 +265,6 @@ This custom component is provided as-is for use with Home Assistant under the MI
 
 ## Version History
 
+- **1.2**: Update all files previously under `/www/community/deluge-status-card/` are now under `/www/hacsfiles/deluge-status-card/`.
 - **1.1**: Added switch entity toggle, dual preset support, comprehensive error handling and logging
 - **1.0**: Initial release with set_speed service
