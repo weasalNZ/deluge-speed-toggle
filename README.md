@@ -1,3 +1,4 @@
+#
 # Deluge Speed Toggle
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
@@ -10,7 +11,6 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 - [Quick Start / Installation](#rocket-quick-start--installation)
   - [Method 1: HACS (Recommended)](#method-1-hacs-recommended)
   - [Method 2: Manual Installation](#method-2-manual-installation)
-- [Installing the Integration](#installing-the-integration)
 - [Troubleshooting](#troubleshooting)
 - [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
 - [Support & Links](#support--links)
