@@ -6,9 +6,9 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 ## :notebook_with_decorative_cover: Table of Contents
 
 - [Requirements](#requirements)
-- [:sparkles: Features & Overview](#sparkles-features--overview)
-- [:camera: Example Card Screenshot](#camera-example-card-screenshot)
-- [:rocket: Quick Start / Installation](#rocket-quick-start--installation)
+- [Features & Overview](#sparkles-features--overview)
+- [Example Card Screenshot](#camera-example-card-screenshot)
+- [Quick Start / Installation](#rocket-quick-start--installation)
   - [Method 1: HACS (Recommended)](#method-1-hacs-recommended)
   - [Method 2: Manual Installation](#method-2-manual-installation)
 - [Configuration Wizard](#configuration-wizard)
