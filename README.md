@@ -1,3 +1,14 @@
+2. **Add the resource in Home Assistant:**
+  - Go to **Settings → Dashboards → Resources**
+  - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+3. **Add the card to your dashboard:**
+  ```yaml
+  type: custom:deluge-status-card
+  entity: switch.deluge_speed_toggle
+  name: "Deluge Server"
+  show_speed: true
+  show_torrents: true
+  ```
 
 # Deluge Speed Toggle
 
@@ -15,6 +26,7 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 - [Speed Units](#speed-units)
 - [Installation: Custom Lovelace Card](#installation-custom-lovelace-card)
 - [Card Configuration Options](#card-configuration-options)
+- [Adding the Resource in Home Assistant](#adding-the-resource-in-home-assistant)
 - [Usage](#usage)
 - [Troubleshooting](#troubleshooting)
 - [Testing the Deluge JSON-RPC API](#testing-the-deluge-json-rpc-api)
@@ -63,35 +75,6 @@ Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent 
 
 ## :rocket: Quick Start / Installation
 
-### Method 1: HACS (Recommended)
-1. **Add Custom Repository** in HACS:
-   - Go to HACS → Integrations → ⋮ (three dots) → Custom repositories
-   - Add URL: `https://github.com/weasalNZ/deluge-speed-toggle`
-   - Category: Integration
-   - Click "Add"
-2. **Install via HACS**:
-   - Search for "Deluge Speed Toggle" in HACS Integrations
-   - Click "Download"
-   - Restart Home Assistant
-
-
-### Method 2: Manual Installation
-
-**Setup Steps:**
-1. Copy the component files to your Home Assistant `custom_components` directory:
-   ```
-   ~/.homeassistant/custom_components/deluge_speed_toggle/
-   ├── __init__.py
-   ├── config_flow.py
-   ├── const.py
-   ├── manifest.json
-   ├── services.yaml
-   ├── speed_toggle.py
-   ├── switch.py
-   └── README.md
-   ```
-2. Restart Home Assistant to load the custom component
-
 ---
 **Add Integration**:
    - Go to Settings → Devices & Services
@@ -132,34 +115,39 @@ You can edit these options later by clicking the integration in Home Assistant a
 
 ### Method 1: Manual Copy
 1. **Copy the card file to your Home Assistant:**
-
-    /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
+   
+   /config/www/hacsfiles/deluge-status-card/deluge-status-card.js
 
 ### Method 2: Terminal Download (curl)
 1. **Download the card file using curl:**
+   ```sh
+   mkdir -p /config/www/hacsfiles/deluge-status-card
+   curl -L -o /config/www/hacsfiles/deluge-status-card/deluge-status-card.js \
+     https://raw.githubusercontent.com/weasalNZ/deluge-speed-toggle/main/www/hacsfiles/deluge-status-card/deluge-status-card.js
+   ```
+   > This command works on Home Assistant OS, Supervised, and inside the Home Assistant Docker container. If you are running Home Assistant in Docker, run this command inside your container (e.g., `docker exec -it homeassistant bash`).
+   > If the directory does not exist, the first command will create it.
 
-    ```sh
-    mkdir -p /config/www/hacsfiles/deluge-status-card
-    curl -L -o /config/www/hacsfiles/deluge-status-card/deluge-status-card.js \
-      https://raw.githubusercontent.com/weasalNZ/deluge-speed-toggle/main/www/hacsfiles/deluge-status-card/deluge-status-card.js
-    ```
+---
 
-    > This command works on Home Assistant OS, Supervised, and inside the Home Assistant Docker container. If you are running Home Assistant in Docker, run this command inside your container (e.g., `docker exec -it homeassistant bash`).
-    > If the directory does not exist, the first command will create it.
+## Adding the Resource in Home Assistant
 
-2. **Add the resource in Home Assistant:**
-    - Go to **Settings → Dashboards → Resources**
-    - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+After copying or downloading the card file, add the resource in Home Assistant:
 
-3. **Add the card to your dashboard:**
+1. Go to **Settings → Dashboards → Resources**
+2. Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
 
-    ```yaml
-    type: custom:deluge-status-card
-    entity: switch.deluge_speed_toggle
-    name: "Deluge Server"
-    show_speed: true
-    show_torrents: true
-    ```
+### Add the card to your dashboard
+
+Add the following to your dashboard:
+
+```yaml
+type: custom:deluge-status-card
+entity: switch.deluge_speed_toggle
+name: "Deluge Server"
+show_speed: true
+show_torrents: true
+```
   ## Card Configuration Options
 
   | Option         | Default         | Description                                 |
