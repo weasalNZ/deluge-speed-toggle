@@ -1,15 +1,3 @@
-2. **Add the resource in Home Assistant:**
-  - Go to **Settings → Dashboards → Resources**
-  - Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
-3. **Add the card to your dashboard:**
-  ```yaml
-  type: custom:deluge-status-card
-  entity: switch.deluge_speed_toggle
-  name: "Deluge Server"
-  show_speed: true
-  show_torrents: true
-  ```
-
 # Deluge Speed Toggle
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
@@ -132,14 +120,16 @@ You can edit these options later by clicking the integration in Home Assistant a
 
 ## Adding the Resource in Home Assistant
 
-After copying or downloading the card file, add the resource in Home Assistant:
+After copying or downloading the card file, complete these steps:
 
-1. Go to **Settings → Dashboards → Resources**
-2. Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+### 1. Add the resource in Home Assistant
 
-### Add the card to your dashboard
+- Go to **Settings → Dashboards → Resources**
+- Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
 
-Add the following to your dashboard:
+### 2. Add the card to your dashboard
+
+Add the following to your dashboard YAML:
 
 ```yaml
 type: custom:deluge-status-card
