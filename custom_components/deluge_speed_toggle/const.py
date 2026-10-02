@@ -1,4 +1,4 @@
-DOMAIN = "deluge"
+DOMAIN = "deluge_speed_toggle"
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_PASSWORD = "password"
