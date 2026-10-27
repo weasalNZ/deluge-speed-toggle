@@ -79,10 +79,11 @@ class DelugeStatusCard extends LitElement {
 
   getSensor(name, legacyEntityId) {
     const configuredEntityId = this.config.sensors?.[name];
-    const switchSuffix = (this.config.entity || '').match(/^switch\.speed_toggle_(.+?)(?:_\d+)?$/)?.[1];
+    const switchPrefix = (this.config.entity || '').match(/^switch\.(.+?)_speed_toggle(?:_\d+)?$/)?.[1];
     const candidates = [
       configuredEntityId,
-      switchSuffix && `sensor.${name}_${switchSuffix}`,
+      switchPrefix && `sensor.${switchPrefix}_${name}`,
+      `sensor.deluge_${name}`,
       `sensor.${name}_deluge`,
       `sensor.deluge_${name}_deluge`,
       `sensor.deluge_server_${name}_deluge`,

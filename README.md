@@ -183,22 +183,22 @@ Add the following to your dashboard YAML:
 
 ```yaml
 type: custom:deluge-status-card
-entity: switch.speed_toggle_deluge
+entity: switch.deluge_speed_toggle
 name: "Deluge Server"
 show_speed: true
 show_torrents: true
 ```
 
-Sensors have a trailing Deluge marker, such as `sensor.download_speed_deluge`. The device is named **Deluge Server** by default; you can rename it in Home Assistant's device settings without affecting sensor entity IDs. The card auto-detects standard and legacy sensor IDs. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
+Entity IDs start with the Server Name you choose at setup (default Deluge), such as `sensor.deluge_download_speed`. The device is named **Deluge Server** by default; you can rename it in Home Assistant's device settings without affecting sensor entity IDs. The card auto-detects standard and legacy sensor IDs. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
 
 ```yaml
 type: custom:deluge-status-card
-entity: switch.speed_toggle_deluge
+entity: switch.deluge_speed_toggle
 sensors:
-  download_speed: sensor.download_speed_deluge
-  upload_speed: sensor.upload_speed_deluge
-  torrent_count: sensor.torrent_count_deluge
-  active_torrents: sensor.active_torrents_deluge
+  download_speed: sensor.deluge_download_speed
+  upload_speed: sensor.deluge_upload_speed
+  torrent_count: sensor.deluge_torrent_count
+  active_torrents: sensor.deluge_active_torrents
 ```
   ## Card Configuration Options
 
@@ -229,7 +229,7 @@ automation:
   - alias: "Limit Deluge at night"
       at: "22:00:00"
     action:
-      entity_id: switch.speed_toggle_deluge
+      entity_id: switch.deluge_speed_toggle
 
   - alias: "Unlimited Deluge in morning"
     trigger:
@@ -237,7 +237,7 @@ automation:
       at: "08:00:00"
     action:
       service: switch.turn_on
-      entity_id: switch.speed_toggle_deluge
+      entity_id: switch.deluge_speed_toggle
 ```
   - `upload`: Upload speed in KiB/s (`-1` for unlimited)
 - **Example**:
@@ -279,9 +279,9 @@ automation:
 
 ### Card Not Displaying or Entity ID Issues
 
-Ensure the expected entity IDs exist (e.g., `switch.speed_toggle_deluge`).
+Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`).
 
-Sensors use names ending in a “Deluge” marker (for example, **Download Speed Deluge** and `sensor.download_speed_deluge`). The device is named **Deluge Server** by default; you can change its name in device settings without changing sensor IDs. Sensor unique IDs are scoped to each configured host and port. After updating, restart Home Assistant; if entity IDs still show the old ordering, use **Recreate Entity IDs**:
+Sensors are named after the Server Name set at setup (for example, **Deluge Download Speed** and `sensor.deluge_download_speed`). The device is named **Deluge Server** by default; you can change its name in device settings without changing sensor IDs. Sensor unique IDs are scoped to each configured host and port. After updating, restart Home Assistant; if entity IDs still show the old ordering, use **Recreate Entity IDs**:
 
 1. Go to **Settings > Devices & Services**
 2. Find **Deluge RPC Control** and click the arrow next to your Deluge Server
@@ -294,7 +294,7 @@ If your Deluge Status Card does not display correctly and you notice that entity
 
 ![Deluge Status Card Entity ID Error](www/hacsfiles/deluge-status-card/deluge-status-card-entity-id-error.png)
 
-The card recognizes both the new suffix-marker entity IDs and older IDs such as `sensor.deluge_server_deluge_download_speed`. If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
+The card recognizes both the new server-name-prefixed entity IDs and older IDs such as `sensor.deluge_server_deluge_download_speed`. If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
 
 ### Logging
 Enable debug logging in `configuration.yaml` for more details:

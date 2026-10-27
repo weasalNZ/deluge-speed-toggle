@@ -194,11 +194,11 @@ async def async_setup_services(hass: HomeAssistant):
                     
                     result = await resp.json()
                     if result.get("result"):
-                        _LOGGER.info("✅ Deluge connection test SUCCESSFUL")
+                        _LOGGER.info("âœ… Deluge connection test SUCCESSFUL")
                     else:
-                        _LOGGER.error("❌ Deluge authentication failed")
+                        _LOGGER.error("âŒ Deluge authentication failed")
         except Exception as err:
-            _LOGGER.error("❌ Deluge connection test FAILED: %s", err)
+            _LOGGER.error("âŒ Deluge connection test FAILED: %s", err)
     
     hass.services.async_register(DOMAIN, "test_connection", handle_test_connection)
     _LOGGER.debug("Registered deluge_speed_toggle.test_connection service")
@@ -230,10 +230,10 @@ async def async_setup_services(hass: HomeAssistant):
                 
                 auth_result = await auth_response.json()
                 if not auth_result.get("result"):
-                    _LOGGER.error("❌ API Test: Authentication failed - %s", auth_result)
+                    _LOGGER.error("âŒ API Test: Authentication failed - %s", auth_result)
                     return
                     
-                _LOGGER.info("✅ API Test: Authentication successful")
+                _LOGGER.info("âœ… API Test: Authentication successful")
                 
                 # Test different API methods with authenticated session and correct parameters
                 test_calls = [
@@ -252,22 +252,22 @@ async def async_setup_services(hass: HomeAssistant):
                         )
                         result = await response.json()
                         if result.get("error"):
-                            _LOGGER.warning("⚠️  API Test: %s returned error: %s", method, result.get("error"))
+                            _LOGGER.warning("âš ï¸  API Test: %s returned error: %s", method, result.get("error"))
                         else:
-                            _LOGGER.info("✅ API Test: %s works - returned %d bytes", method, len(str(result)))
+                            _LOGGER.info("âœ… API Test: %s works - returned %d bytes", method, len(str(result)))
                             if method == "daemon.get_method_list":
                                 methods = result.get("result", [])
-                                _LOGGER.info("📋 Available methods: %s", methods[:10])  # Show first 10
+                                _LOGGER.info("ðŸ“‹ Available methods: %s", methods[:10])  # Show first 10
                             elif method == "core.get_session_status":
                                 session_data = result.get("result", {})
-                                _LOGGER.info("📊 Session stats: download=%s, upload=%s", 
+                                _LOGGER.info("ðŸ“Š Session stats: download=%s, upload=%s", 
                                            session_data.get("download_rate", 0),
                                            session_data.get("upload_rate", 0))
                     except Exception as err:
-                        _LOGGER.error("❌ API Test: %s failed: %s", method, err)
+                        _LOGGER.error("âŒ API Test: %s failed: %s", method, err)
                         
         except Exception as err:
-            _LOGGER.error("❌ API Test failed: %s", err)
+            _LOGGER.error("âŒ API Test failed: %s", err)
     
     hass.services.async_register(DOMAIN, "test_api", handle_test_api)
     _LOGGER.debug("Registered deluge_speed_toggle.test_api service")
@@ -557,7 +557,7 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         self.config = config
         self._attr_has_entity_name = False
         server_name = (config.get("server_name") or "Deluge").strip()
-        self._attr_name = f"Speed Toggle {server_name}"
+        self._attr_name = f"{server_name} Speed Toggle"
         host = config.get("host", "localhost")
         port = config.get("port", 8112)
         self._attr_unique_id = f"{DOMAIN}_{host}_{port}_switch"
@@ -903,7 +903,7 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
                     
                     # Check for success - Deluge returns result: null for successful set_config
                     if config_result.get("error") is None:
-                        _LOGGER.info("✅ Successfully set Deluge speeds: %s", speed_config)
+                        _LOGGER.info("âœ… Successfully set Deluge speeds: %s", speed_config)
                         return
                     else:
                         _LOGGER.warning("Unexpected response format: %s", config_result)
@@ -1061,7 +1061,7 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
                             _LOGGER.debug("Alt config result: %s", config_result)
                             
                             if not config_result.get("error"):
-                                _LOGGER.info("✅ Alternative auth method succeeded!")
+                                _LOGGER.info("âœ… Alternative auth method succeeded!")
                                 return
                             else:
                                 raise HomeAssistantError(f"Alt method failed: {config_result.get('error')}")

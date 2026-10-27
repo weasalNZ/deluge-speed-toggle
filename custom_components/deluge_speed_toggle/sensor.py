@@ -264,7 +264,7 @@ class DelugeDownloadSpeedSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"Download Speed {coordinator.server_name}"
+        self._attr_name = f"{coordinator.server_name} Download Speed"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_download_speed_kbs"
         )
@@ -296,7 +296,7 @@ class DelugeUploadSpeedSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"Upload Speed {coordinator.server_name}"
+        self._attr_name = f"{coordinator.server_name} Upload Speed"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_upload_speed_kbs"
         )
@@ -328,7 +328,7 @@ class DelugeTorrentCountSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"Torrent Count {coordinator.server_name}"
+        self._attr_name = f"{coordinator.server_name} Torrent Count"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_torrent_count"
         )
@@ -356,7 +356,7 @@ class DelugeActiveTorrentsSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"Active Torrents {coordinator.server_name}"
+        self._attr_name = f"{coordinator.server_name} Active Torrents"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_active_torrents"
         )
@@ -403,7 +403,7 @@ class DelugeStatusSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"Status {coordinator.server_name}"
+        self._attr_name = f"{coordinator.server_name} Status"
         self._attr_unique_id = f"{DOMAIN}_{coordinator.host}_{coordinator.port}_status"
         self._attr_icon = "mdi:server-network"
 

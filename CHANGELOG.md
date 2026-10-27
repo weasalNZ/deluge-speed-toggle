@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Renamed the integration's Home Assistant display name to Deluge RPC Control; the internal domain remains unchanged.
 - Entity IDs are now set explicitly from the entity name, because newer Home Assistant versions prefixed the device name (`deluge_server_…`) even with `has_entity_name` off.
-- The card derives the sensor suffix from the switch entity (`switch.speed_toggle_<name>`), so custom server names work without a `sensors:` mapping.
-- Setup now asks for an optional **Server Name** (default `Deluge`). It is appended to entity names (e.g. `sensor.download_speed_deluge`, `switch.speed_toggle_deluge`). Unique IDs don't include the name, so existing entities and IDs are unaffected.
-- Renamed the speed switch to Speed Toggle Deluge (`switch.speed_toggle_deluge`) and made the switch and toggle service find sensors and the switch by unique ID instead of fixed entity IDs.
+- The card derives the sensor prefix from the switch entity (`switch.<name>_speed_toggle`), so custom server names work without a `sensors:` mapping.
+- Setup now asks for an optional **Server Name** (default `Deluge`). It is appended to entity names (e.g. `sensor.deluge_download_speed`, `switch.deluge_speed_toggle`). Unique IDs don't include the name, so existing entities and IDs are unaffected.
+- Renamed the speed switch to "<Server Name> Speed Toggle" (`switch.deluge_speed_toggle`) and made the switch and toggle service find sensors and the switch by unique ID instead of fixed entity IDs.
 - Updated sensor names to use a trailing Deluge marker and made sensor unique IDs specific to each configured server.
 - Updated the status card to discover the new sensor IDs while retaining support for legacy IDs.
 
