@@ -190,7 +190,7 @@ show_speed: true
 show_torrents: true
 ```
 
-Entities use Home Assistant's standard naming: the device name followed by the entity name. The device is named after the **Server Name** you enter at setup (default `Deluge`), giving IDs such as `sensor.deluge_download_speed` and `switch.deluge_speed_toggle`; a name of `Seedbox` gives `sensor.seedbox_download_speed`. Renaming the device later does not change existing entity IDs. The card auto-detects standard and legacy sensor IDs. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
+Entities use Home Assistant's standard naming: the device name followed by the entity name. The device is named after the **Server Name** you enter at setup (default `Deluge`), giving IDs such as `sensor.deluge_download_speed` and `switch.deluge_speed_toggle`; a name of `Seedbox` gives `sensor.seedbox_download_speed`. Renaming the device later does not change existing entity IDs. The card derives the sensor IDs from the switch you set as `entity:`. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
 
 ```yaml
 type: custom:deluge-status-card
@@ -295,7 +295,7 @@ If your Deluge Status Card does not display correctly and you notice that entity
 
 ![Deluge Status Card Entity ID Error](www/hacsfiles/deluge-status-card/deluge-status-card-entity-id-error.png)
 
-The card recognizes both the standard entity IDs (`sensor.deluge_download_speed`) and older IDs such as `sensor.deluge_server_deluge_download_speed`. If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
+The card finds sensors using the prefix of the switch set as `entity:` (for `switch.deluge_speed_toggle` it uses `sensor.deluge_download_speed` and so on). If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
 
 ### Logging
 Enable debug logging in `configuration.yaml` for more details:
@@ -353,7 +353,7 @@ This custom component is provided as-is for use with Home Assistant under the MI
 ## Version History
 
 - **Unreleased**: Renamed the integration to **Deluge RPC Control** in Home Assistant. The internal domain remains `deluge_speed_toggle`.
-- **Unreleased**: Improved sensor entity naming with a trailing Deluge marker, made sensor unique IDs specific to each server, and updated the status card to discover current and legacy sensor IDs.
+- **Unreleased**: Entities now use the device name entered at setup plus the entity name, sensor unique IDs are specific to each server, and the status card finds sensors from the switch's prefix.
 - **1.2**: Update all files previously under `/www/community/deluge-status-card/` are now under `/www/hacsfiles/deluge-status-card/`.
 - **1.1**: Added switch entity toggle, dual preset support, comprehensive error handling and logging
 - **1.0**: Initial release with set_speed service

@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the integration's Home Assistant display name to Deluge RPC Control; the internal domain remains unchanged.
 - Entities now use Home Assistant's standard device-name + entity-name naming (has_entity_name): sensors are Download Speed, Upload Speed, Torrent Count, Active Torrents and Status, and the switch is Speed Toggle, giving IDs like sensor.deluge_download_speed and switch.deluge_speed_toggle. The device is named after the optional **Server Name** entered at setup (default `Deluge`), so IDs follow that name (e.g. `sensor.seedbox_status`).
 - Sensor unique IDs are now specific to each configured host and port, and the switch and toggle service find sensors and the switch by unique ID instead of fixed entity IDs.
-- The card derives the sensor prefix from the switch entity and still supports legacy IDs and an explicit `sensors:` mapping.
+- The card derives the sensor prefix from the switch entity and supports an explicit `sensors:` mapping.
 
 ## [1.4] - 2025-11-19
 

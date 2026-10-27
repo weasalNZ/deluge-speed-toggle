@@ -84,18 +84,10 @@ class DelugeStatusCard extends LitElement {
       configuredEntityId,
       switchPrefix && `sensor.${switchPrefix}_${name}`,
       `sensor.deluge_${name}`,
-      `sensor.${name}_deluge`,
-      `sensor.deluge_${name}_deluge`,
-      `sensor.deluge_server_${name}_deluge`,
-      `sensor.deluge_server_deluge_${name}`,
       legacyEntityId,
       ...Object.keys(this.hass.states).filter(id =>
-        id.startsWith('sensor.') &&
-        new RegExp(`_${name}_deluge(?:_\\d+)?$`).test(id)
-      ),
-      ...Object.keys(this.hass.states).filter(id =>
-        id.startsWith('sensor.deluge') &&
-        new RegExp(`(?:_deluge)?_${name}(?:_\\d+)?$`).test(id)
+        id.startsWith('sensor.') && new RegExp(`_${name}(?:_\\d+)?$`).test(id) &&
+        (!switchPrefix || id.startsWith(`sensor.${switchPrefix}_`))
       )
     ].filter(Boolean);
 
