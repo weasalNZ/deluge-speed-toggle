@@ -7,8 +7,6 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 from .const import (
     DOMAIN,
-    CONF_SERVER_NAME,
-    DEFAULT_SERVER_NAME,
     CONF_PRESET1_DOWNLOAD,
     CONF_PRESET1_UPLOAD,
     CONF_PRESET2_DOWNLOAD,
@@ -75,7 +73,6 @@ class DelugeSpeedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema({
-                vol.Optional(CONF_SERVER_NAME, default=DEFAULT_SERVER_NAME): str,
                 vol.Required(CONF_HOST, default="localhost"): str,
                 vol.Required(CONF_PORT, default=8112): int,
                 vol.Required(CONF_PASSWORD): str,

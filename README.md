@@ -183,22 +183,22 @@ Add the following to your dashboard YAML:
 
 ```yaml
 type: custom:deluge-status-card
-entity: switch.deluge_speed_toggle
+entity: switch.deluge_server_speed_toggle
 name: "Deluge Server"
 show_speed: true
 show_torrents: true
 ```
 
-Entity IDs start with the Server Name you choose at setup (default Deluge), such as `sensor.deluge_download_speed`. The device is named **Deluge Server** by default; you can rename it in Home Assistant's device settings without affecting sensor entity IDs. The card auto-detects standard and legacy sensor IDs. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
+Entities use Home Assistant's standard naming: the device name (**Deluge Server**) followed by the entity name, such as `sensor.deluge_server_download_speed`. Renaming the device later does not change existing entity IDs. The card auto-detects standard and legacy sensor IDs. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
 
 ```yaml
 type: custom:deluge-status-card
-entity: switch.deluge_speed_toggle
+entity: switch.deluge_server_speed_toggle
 sensors:
-  download_speed: sensor.deluge_download_speed
-  upload_speed: sensor.deluge_upload_speed
-  torrent_count: sensor.deluge_torrent_count
-  active_torrents: sensor.deluge_active_torrents
+  download_speed: sensor.deluge_server_download_speed
+  upload_speed: sensor.deluge_server_upload_speed
+  torrent_count: sensor.deluge_server_torrent_count
+  active_torrents: sensor.deluge_server_active_torrents
 ```
   ## Card Configuration Options
 
@@ -229,7 +229,7 @@ automation:
   - alias: "Limit Deluge at night"
       at: "22:00:00"
     action:
-      entity_id: switch.deluge_speed_toggle
+      entity_id: switch.deluge_server_speed_toggle
 
   - alias: "Unlimited Deluge in morning"
     trigger:
@@ -237,7 +237,7 @@ automation:
       at: "08:00:00"
     action:
       service: switch.turn_on
-      entity_id: switch.deluge_speed_toggle
+      entity_id: switch.deluge_server_speed_toggle
 ```
   - `upload`: Upload speed in KiB/s (`-1` for unlimited)
 - **Example**:
@@ -279,9 +279,9 @@ automation:
 
 ### Card Not Displaying or Entity ID Issues
 
-Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`).
+Ensure the expected entity IDs exist (e.g., `switch.deluge_server_speed_toggle`).
 
-Sensors are named after the Server Name set at setup (for example, **Deluge Download Speed** and `sensor.deluge_download_speed`). The device is named **Deluge Server** by default; you can change its name in device settings without changing sensor IDs. Sensor unique IDs are scoped to each configured host and port. After updating, restart Home Assistant; if entity IDs still show the old ordering, use **Recreate Entity IDs**:
+Entities use Home Assistant's standard device-name + entity-name IDs (for example `sensor.deluge_server_download_speed`). Renaming the device does not change existing IDs. Sensor unique IDs are scoped to each configured host and port. After updating, restart Home Assistant; if entity IDs still show the old ordering, use **Recreate Entity IDs**:
 
 1. Go to **Settings > Devices & Services**
 2. Find **Deluge RPC Control** and click the arrow next to your Deluge Server
@@ -290,11 +290,11 @@ Sensors are named after the Server Name set at setup (for example, **Deluge Down
 5. Restart Home Assistant if prompted
 
 #### Example: Entity ID Error
-If your Deluge Status Card does not display correctly and you notice that entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), it may look similar to the screenshot below:
+If your Deluge Status Card does not display correctly and you notice that entity IDs have numbers at the end (e.g., `sensor.deluge_server_download_speed_2`), it may look similar to the screenshot below:
 
 ![Deluge Status Card Entity ID Error](www/hacsfiles/deluge-status-card/deluge-status-card-entity-id-error.png)
 
-The card recognizes both the new server-name-prefixed entity IDs and older IDs such as `sensor.deluge_server_deluge_download_speed`. If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
+The card recognizes both the standard entity IDs (`sensor.deluge_server_download_speed`) and older IDs such as `sensor.deluge_server_deluge_download_speed`. If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
 
 ### Logging
 Enable debug logging in `configuration.yaml` for more details:

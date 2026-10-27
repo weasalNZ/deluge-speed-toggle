@@ -10,7 +10,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.util import slugify
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,10 +37,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         DelugeActiveTorrentsSensor(coordinator),
         DelugeStatusSensor(coordinator),
     ]
-
-    # Pin entity IDs to the entity name; newer HA prefixes the device name otherwise
-    for sensor in sensors:
-        sensor.entity_id = f"sensor.{slugify(sensor.name)}"
     
     async_add_entities(sensors, update_before_add=False)
     _LOGGER.info("Deluge monitoring sensors added")
@@ -54,7 +49,6 @@ class DelugeDataCoordinator(DataUpdateCoordinator):
         self.host = config["host"]
         self.port = config["port"]
         self.password = config["password"]
-        self.server_name = (config.get("server_name") or "Deluge").strip()
         
         super().__init__(
             hass,
@@ -228,7 +222,7 @@ class DelugeDataCoordinator(DataUpdateCoordinator):
 class DelugeBaseSensor(SensorEntity):
     """Base class for Deluge sensors."""
 
-    _attr_has_entity_name = False
+    _attr_has_entity_name = True
 
     def __init__(self, coordinator: DelugeDataCoordinator):
         """Initialize the sensor."""
@@ -264,7 +258,7 @@ class DelugeDownloadSpeedSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.server_name} Download Speed"
+        self._attr_name = "Download Speed"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_download_speed_kbs"
         )
@@ -296,7 +290,7 @@ class DelugeUploadSpeedSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.server_name} Upload Speed"
+        self._attr_name = "Upload Speed"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_upload_speed_kbs"
         )
@@ -328,7 +322,7 @@ class DelugeTorrentCountSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.server_name} Torrent Count"
+        self._attr_name = "Torrent Count"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_torrent_count"
         )
@@ -356,7 +350,7 @@ class DelugeActiveTorrentsSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.server_name} Active Torrents"
+        self._attr_name = "Active Torrents"
         self._attr_unique_id = (
             f"{DOMAIN}_{coordinator.host}_{coordinator.port}_active_torrents"
         )
@@ -403,7 +397,7 @@ class DelugeStatusSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = f"{coordinator.server_name} Status"
+        self._attr_name = "Status"
         self._attr_unique_id = f"{DOMAIN}_{coordinator.host}_{coordinator.port}_status"
         self._attr_icon = "mdi:server-network"
 
