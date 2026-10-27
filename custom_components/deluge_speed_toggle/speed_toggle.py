@@ -554,7 +554,8 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         self.hass = hass
         self.config = config
         self._attr_has_entity_name = False
-        self._attr_name = "Speed Toggle Deluge"
+        server_name = (config.get("server_name") or "Deluge").strip()
+        self._attr_name = f"Speed Toggle {server_name}"
         host = config.get("host", "localhost")
         port = config.get("port", 8112)
         self._attr_unique_id = f"{DOMAIN}_{host}_{port}_switch"
