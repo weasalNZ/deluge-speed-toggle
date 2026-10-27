@@ -7,6 +7,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
+from homeassistant.util import slugify
 from .const import (
     DOMAIN,
     CONF_PRESET1_DOWNLOAD,
@@ -26,6 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     _LOGGER.debug("Setting up Deluge Speed switch entity")
     config = entry.data
     switch = DelugeSpeedToggleSwitch(hass, config)
+    switch.entity_id = f"switch.{slugify(switch.name)}"
     async_add_entities([switch])
     _LOGGER.info("Deluge Speed switch entity added")
 

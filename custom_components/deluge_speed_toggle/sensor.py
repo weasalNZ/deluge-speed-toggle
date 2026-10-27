@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import slugify
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +38,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         DelugeActiveTorrentsSensor(coordinator),
         DelugeStatusSensor(coordinator),
     ]
+
+    # Pin entity IDs to the entity name; newer HA prefixes the device name otherwise
+    for sensor in sensors:
+        sensor.entity_id = f"sensor.{slugify(sensor.name)}"
     
     async_add_entities(sensors, update_before_add=False)
     _LOGGER.info("Deluge monitoring sensors added")
