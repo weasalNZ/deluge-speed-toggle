@@ -83,7 +83,7 @@ class DelugeStatusCard extends LitElement {
     const candidates = [
       configuredEntityId,
       switchPrefix && `sensor.${switchPrefix}_${name}`,
-      `sensor.deluge_server_${name}`,
+      `sensor.deluge_${name}`,
       `sensor.${name}_deluge`,
       `sensor.deluge_${name}_deluge`,
       `sensor.deluge_server_${name}_deluge`,

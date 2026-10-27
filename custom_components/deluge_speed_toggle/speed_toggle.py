@@ -566,7 +566,7 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         # Add device info for better integration
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{config.get('host', 'localhost')}_{config.get('port', 8112)}")},
-            "name": "Deluge Server",
+            "name": (config.get("server_name") or "Deluge").strip(),
             "manufacturer": "Deluge",
             "model": "Torrent Client", 
             "sw_version": "1.1",

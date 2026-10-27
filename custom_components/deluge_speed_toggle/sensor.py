@@ -49,6 +49,7 @@ class DelugeDataCoordinator(DataUpdateCoordinator):
         self.host = config["host"]
         self.port = config["port"]
         self.password = config["password"]
+        self.server_name = (config.get("server_name") or "Deluge").strip()
         
         super().__init__(
             hass,
@@ -232,7 +233,7 @@ class DelugeBaseSensor(SensorEntity):
         # Add device info to group sensors with the switch
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.host}_{coordinator.port}")},
-            "name": "Deluge Server",
+            "name": coordinator.server_name,
             "manufacturer": "Deluge",
             "model": "Torrent Client",
             "sw_version": "1.1",

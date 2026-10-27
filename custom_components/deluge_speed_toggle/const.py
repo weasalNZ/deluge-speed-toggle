@@ -2,6 +2,8 @@ DOMAIN = "deluge_speed_toggle"
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_PASSWORD = "password"
+CONF_SERVER_NAME = "server_name"
+DEFAULT_SERVER_NAME = "Deluge"
 
 # Preset 1 - Slow/Limited speeds (in KiB/s)
 CONF_PRESET1_DOWNLOAD = "preset1_download"
