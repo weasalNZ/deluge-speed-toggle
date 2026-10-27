@@ -77,6 +77,10 @@ class DelugeStatusCard extends LitElement {
     `;
   }
 
+  getSensorPrefix() {
+    return (this.config.entity || '').match(/^switch\.(.+?)_speed_toggle(?:_\d+)?$/)?.[1] || 'deluge';
+  }
+
   getSensor(name, legacyEntityId) {
     const configuredEntityId = this.config.sensors?.[name];
     const switchPrefix = (this.config.entity || '').match(/^switch\.(.+?)_speed_toggle(?:_\d+)?$/)?.[1];
@@ -173,7 +177,7 @@ class DelugeStatusCard extends LitElement {
             <ha-icon icon="mdi:download-multiple"></ha-icon>
             Torrents
           </div>
-          <div class="unavailable">Torrent monitoring sensors not available</div>
+          <div class="unavailable">Torrent monitoring sensors not available<br><small>looking for sensor.${this.getSensorPrefix()}_torrent_count (card v1.5)</small></div>
         </div>
       `;
     }
