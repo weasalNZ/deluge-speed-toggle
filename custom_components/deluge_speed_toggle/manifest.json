@@ -1,6 +1,6 @@
 {
   "domain": "deluge_speed_toggle",
-  "name": "Deluge Speed Toggle", 
+  "name": "Deluge RPC Control",
   "version": "1.4",
   "documentation": "https://github.com/weasalNZ/deluge-speed-toggle",
   "dependencies": [],

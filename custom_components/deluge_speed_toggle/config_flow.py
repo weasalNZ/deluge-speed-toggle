@@ -67,8 +67,8 @@ class DelugeSpeedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not await validate_deluge_connection(self.hass, user_input):
                 errors["base"] = "cannot_connect"
             else:
-                _LOGGER.info("Creating new Deluge Speed config entry")
-                return self.async_create_entry(title="Deluge Speed", data=user_input)
+                _LOGGER.info("Creating new Deluge RPC Control config entry")
+                return self.async_create_entry(title="Deluge RPC Control", data=user_input)
 
         return self.async_show_form(
             step_id="user",

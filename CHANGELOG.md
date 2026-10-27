@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Renamed the integration's Home Assistant display name to Deluge RPC Control; the internal domain remains unchanged.
+- Updated sensor names to use a trailing Deluge marker and made sensor unique IDs specific to each configured server.
+- Updated the status card to discover the new sensor IDs while retaining support for legacy IDs.
+
 ## [1.4] - 2025-11-19
 
 ### Added

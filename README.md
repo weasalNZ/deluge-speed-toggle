@@ -1,5 +1,5 @@
 #
-# Deluge Speed Toggle
+# Deluge RPC Control
 
 A Home Assistant custom component that provides a simple toggle switch to quickly switch between two preset download/upload speed limits for the Deluge torrent client.
 
@@ -31,7 +31,7 @@ A Home Assistant custom component that provides a simple toggle switch to quickl
 
 ## :sparkles: Features & Overview
 
-Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent client between two speed presets (e.g., "Limited" and "Unlimited") directly from Home Assistant. This is ideal for:
+Deluge RPC Control is a Home Assistant integration for controlling your Deluge torrent client. It provides speed presets and torrent monitoring and management directly from Home Assistant. This is ideal for:
 
 - Instantly throttling or unthrottling your downloads/uploads
 - Automating speed changes based on time of day or network conditions
@@ -60,15 +60,16 @@ Deluge Speed Toggle provides a simple way to quickly switch your Deluge torrent 
 ## :rocket: Quick Start / Installation
 
 ### Method 1: HACS (Recommended)
-1. Go to **HACS → Integrations → ⋮ (three dots) → Custom repositories**
-2. Add repository URL: `https://github.com/weasalNZ/deluge-speed-toggle` and select **Integration** as the category
-3. Click **Add**
-4. Go to **HACS → Integrations**
-5. Search for **Deluge Speed Toggle**
-6. Click **Download** and follow the prompts
-7. Restart Home Assistant
-8. Go to **Settings → Devices & Services → Add Integration**
-9. Search for **Deluge Speed Toggle** and add it
+1. Make sure the GitHub repository containing this integration is pushed and accessible to Home Assistant.
+2. Go to **HACS → Integrations → ⋮ (three dots) → Custom repositories**.
+3. Add repository URL: `https://github.com/weasalNZ/deluge-speed-toggle` and select **Integration** as the category.
+4. Click **Add**.
+5. In HACS, find **Deluge RPC Control** and download it.
+6. Restart Home Assistant.
+7. Go to **Settings → Devices & Services → Add Integration**.
+8. Search for **Deluge RPC Control** and add it.
+
+Keep the component directory named `custom_components/deluge_speed_toggle`. That name is the integration's internal domain and must match the `domain` in its manifest; **Deluge RPC Control** is the user-facing name shown in HACS and Home Assistant.
 
 ---
 ### Method 2: Manual Installation
@@ -102,7 +103,7 @@ You can install the custom component manually using either of the following opti
 
 2. Restart Home Assistant
 3. Go to **Settings → Devices & Services → Add Integration**
-4. Search for **Deluge Speed Toggle** and add it
+4. Search for **Deluge RPC Control** and add it
 
 ---
 
@@ -187,6 +188,18 @@ name: "Deluge Server"
 show_speed: true
 show_torrents: true
 ```
+
+Sensors have a trailing Deluge marker, such as `sensor.download_speed_deluge`. The device is named **Deluge Server** by default; you can rename it in Home Assistant's device settings without affecting sensor entity IDs. The card auto-detects standard and legacy sensor IDs. If IDs are customized or you have multiple Deluge servers, specify sensor entities explicitly:
+
+```yaml
+type: custom:deluge-status-card
+entity: switch.deluge_speed_toggle
+sensors:
+  download_speed: sensor.download_speed_deluge
+  upload_speed: sensor.upload_speed_deluge
+  torrent_count: sensor.torrent_count_deluge
+  active_torrents: sensor.active_torrents_deluge
+```
   ## Card Configuration Options
 
   | Option         | Default         | Description                                 |
@@ -196,6 +209,7 @@ show_torrents: true
   | `show_title`  | true           | Show/hide the card header                   |
   | `show_speed`  | true           | Show/hide current speed section             |
   | `show_torrents`| true           | Show/hide torrent statistics                |
+  | `sensors`     | auto-detected  | Optional entity IDs for `download_speed`, `upload_speed`, `torrent_count`, and `active_torrents` |
 
   ---
 
@@ -203,7 +217,7 @@ show_torrents: true
 
 ### Using the Switch in Home Assistant UI
 - Go to **Settings → Devices & Services → Entities** in Home Assistant.
-- Find the **Deluge Speed Toggle** switch.
+- Find the Deluge speed toggle switch.
 - Click the toggle to switch between your configured speed presets:
   - **OFF** = Preset 1 (Limited speeds)
   - **ON** = Preset 2 (Unlimited speeds)
@@ -267,10 +281,10 @@ automation:
 
 Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`).
 
-If entity IDs have numbers at the end (e.g., `sensor.deluge_download_speed_2`), recreate entity IDs in Home Assistant:
+Sensors use names ending in a “Deluge” marker (for example, **Download Speed Deluge** and `sensor.download_speed_deluge`). The device is named **Deluge Server** by default; you can change its name in device settings without changing sensor IDs. Sensor unique IDs are scoped to each configured host and port. After updating, restart Home Assistant; if entity IDs still show the old ordering, use **Recreate Entity IDs**:
 
 1. Go to **Settings > Devices & Services**
-2. Find **Deluge Speed Toggle** and click the arrow next to your Deluge Server
+2. Find **Deluge RPC Control** and click the arrow next to your Deluge Server
 3. Click the three dots (⋮) in the top right corner
 4. Select **Recreate Entity IDs**
 5. Restart Home Assistant if prompted
@@ -280,7 +294,7 @@ If your Deluge Status Card does not display correctly and you notice that entity
 
 ![Deluge Status Card Entity ID Error](www/hacsfiles/deluge-status-card/deluge-status-card-entity-id-error.png)
 
-This usually means the card cannot find the expected entities. See the steps above to recreate entity IDs and resolve this issue.
+The card recognizes both the new suffix-marker entity IDs and older IDs such as `sensor.deluge_server_deluge_download_speed`. If you have customized IDs or multiple Deluge servers, use the optional `sensors` configuration shown above to select the correct entities.
 
 ### Logging
 Enable debug logging in `configuration.yaml` for more details:
@@ -337,6 +351,8 @@ This custom component is provided as-is for use with Home Assistant under the MI
 
 ## Version History
 
+- **Unreleased**: Renamed the integration to **Deluge RPC Control** in Home Assistant. The internal domain remains `deluge_speed_toggle`.
+- **Unreleased**: Improved sensor entity naming with a trailing Deluge marker, made sensor unique IDs specific to each server, and updated the status card to discover current and legacy sensor IDs.
 - **1.2**: Update all files previously under `/www/community/deluge-status-card/` are now under `/www/hacsfiles/deluge-status-card/`.
 - **1.1**: Added switch entity toggle, dual preset support, comprehensive error handling and logging
 - **1.0**: Initial release with set_speed service

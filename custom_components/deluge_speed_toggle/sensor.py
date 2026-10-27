@@ -94,44 +94,37 @@ class DelugeDataCoordinator(DataUpdateCoordinator):
             _LOGGER.debug("Sensor authentication successful")
             
             # Step 2: Get session stats with required keys parameter
-            stats_response = await session.post(
-                f"http://{self.host}:{self.port}/json",
-                json={
-                    "method": "core.get_session_status", 
-                    "params": [["download_rate", "upload_rate", "num_peers", "dht_nodes"]], 
-                    "id": 2
-                }
+            url = f"http://{self.host}:{self.port}/json"
+
+            async def rpc(method, params, rpc_id):
+                async with session.post(
+                    url, json={"method": method, "params": params, "id": rpc_id}
+                ) as resp:
+                    if resp.status != 200:
+                        raise Exception(f"{method} failed: HTTP {resp.status}")
+                    return await resp.json(content_type=None)
+
+            # Web UI must be connected to a daemon before core.* calls work
+            connected = await rpc("web.connected", [], 10)
+            if not connected.get("result"):
+                hosts = await rpc("web.get_hosts", [], 11)
+                host_list = hosts.get("result") or []
+                if not host_list:
+                    raise Exception("Deluge web UI has no daemon configured")
+                await rpc("web.connect", [host_list[0][0]], 12)
+
+            stats = await rpc(
+                "core.get_session_status", [["download_rate", "upload_rate"]], 2
             )
-            
-            # Step 3: Get torrent list with required filter_dict and keys parameters
-            torrents_response = await session.post(
-                f"http://{self.host}:{self.port}/json",
-                json={
-                    "method": "core.get_torrents_status", 
-                    "params": [
-                        {},  # filter_dict (empty = all torrents)
-                        ["name", "state", "progress", "download_payload_rate", "upload_payload_rate", "eta", "ratio", "label", "time_added", "total_size", "total_done", "queue"]  # keys
-                    ], 
-                    "id": 3
-                }
+            torrents = await rpc(
+                "core.get_torrents_status",
+                [
+                    {},
+                    ["name", "state", "progress", "download_payload_rate", "upload_payload_rate", "eta", "ratio", "time_added", "total_size", "total_done", "queue"],
+                ],
+                3,
             )
-            
-            # Step 4: Get config with authenticated session  
-            config_response = await session.post(
-                f"http://{self.host}:{self.port}/json",
-                json={"method": "core.get_config", "params": [], "id": 4}
-            )
-            
-            if stats_response.status != 200:
-                raise Exception(f"Stats request failed: HTTP {stats_response.status}")
-            if torrents_response.status != 200:
-                raise Exception(f"Torrents request failed: HTTP {torrents_response.status}")
-            if config_response.status != 200:
-                raise Exception(f"Config request failed: HTTP {config_response.status}")
-                
-            stats = await stats_response.json()
-            torrents = await torrents_response.json()
-            config = await config_response.json()
+            config = await rpc("core.get_config", [], 4)
             
             # Debug log the raw responses
             _LOGGER.debug("Raw stats response: %s", stats)
@@ -229,6 +222,8 @@ class DelugeDataCoordinator(DataUpdateCoordinator):
 class DelugeBaseSensor(SensorEntity):
     """Base class for Deluge sensors."""
 
+    _attr_has_entity_name = False
+
     def __init__(self, coordinator: DelugeDataCoordinator):
         """Initialize the sensor."""
         self.coordinator = coordinator
@@ -263,8 +258,10 @@ class DelugeDownloadSpeedSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = "Deluge Download Speed"
-        self._attr_unique_id = f"{DOMAIN}_download_speed_kbs"
+        self._attr_name = "Download Speed Deluge"
+        self._attr_unique_id = (
+            f"{DOMAIN}_{coordinator.host}_{coordinator.port}_download_speed_kbs"
+        )
         self._attr_device_class = SensorDeviceClass.DATA_RATE  
         self._attr_native_unit_of_measurement = "kB/s"
         self._attr_icon = "mdi:download"
@@ -293,8 +290,10 @@ class DelugeUploadSpeedSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = "Deluge Upload Speed"
-        self._attr_unique_id = f"{DOMAIN}_upload_speed_kbs"
+        self._attr_name = "Upload Speed Deluge"
+        self._attr_unique_id = (
+            f"{DOMAIN}_{coordinator.host}_{coordinator.port}_upload_speed_kbs"
+        )
         self._attr_device_class = SensorDeviceClass.DATA_RATE
         self._attr_native_unit_of_measurement = "kB/s"
         self._attr_icon = "mdi:upload"
@@ -323,8 +322,10 @@ class DelugeTorrentCountSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = "Deluge Torrent Count"
-        self._attr_unique_id = f"{DOMAIN}_torrent_count"
+        self._attr_name = "Torrent Count Deluge"
+        self._attr_unique_id = (
+            f"{DOMAIN}_{coordinator.host}_{coordinator.port}_torrent_count"
+        )
         self._attr_icon = "mdi:file-download-outline"
 
     @property
@@ -349,8 +350,10 @@ class DelugeActiveTorrentsSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = "Deluge Active Torrents"
-        self._attr_unique_id = f"{DOMAIN}_active_torrents"
+        self._attr_name = "Active Torrents Deluge"
+        self._attr_unique_id = (
+            f"{DOMAIN}_{coordinator.host}_{coordinator.port}_active_torrents"
+        )
         self._attr_icon = "mdi:download-multiple"
 
     @property
@@ -394,8 +397,8 @@ class DelugeStatusSensor(DelugeBaseSensor):
 
     def __init__(self, coordinator):
         super().__init__(coordinator)
-        self._attr_name = "Deluge Status"
-        self._attr_unique_id = f"{DOMAIN}_status"
+        self._attr_name = "Status Deluge"
+        self._attr_unique_id = f"{DOMAIN}_{coordinator.host}_{coordinator.port}_status"
         self._attr_icon = "mdi:server-network"
 
     @property

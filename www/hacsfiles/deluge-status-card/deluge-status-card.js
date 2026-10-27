@@ -77,10 +77,32 @@ class DelugeStatusCard extends LitElement {
     `;
   }
 
+  getSensor(name, legacyEntityId) {
+    const configuredEntityId = this.config.sensors?.[name];
+    const candidates = [
+      configuredEntityId,
+      `sensor.${name}_deluge`,
+      `sensor.deluge_${name}_deluge`,
+      `sensor.deluge_server_${name}_deluge`,
+      `sensor.deluge_server_deluge_${name}`,
+      legacyEntityId,
+      ...Object.keys(this.hass.states).filter(id =>
+        id.startsWith('sensor.') &&
+        new RegExp(`_${name}_deluge(?:_\\d+)?$`).test(id)
+      ),
+      ...Object.keys(this.hass.states).filter(id =>
+        id.startsWith('sensor.deluge') &&
+        new RegExp(`(?:_deluge)?_${name}(?:_\\d+)?$`).test(id)
+      )
+    ].filter(Boolean);
+
+    return candidates.map(id => this.hass.states[id]).find(Boolean);
+  }
+
   renderSpeedSection(entity) {
     // Try to find speed sensors
-    const downloadEntity = this.hass.states['sensor.deluge_download_speed'];
-    const uploadEntity = this.hass.states['sensor.deluge_upload_speed'];
+    const downloadEntity = this.getSensor('download_speed', 'sensor.deluge_download_speed');
+    const uploadEntity = this.getSensor('upload_speed', 'sensor.deluge_upload_speed');
     
     // Check if entity or sensors are unavailable/unknown
     const isUnavailable = entity.state === 'unavailable' || entity.state === 'unknown' ||
@@ -145,8 +167,8 @@ class DelugeStatusCard extends LitElement {
 
   renderTorrentSection() {
     // Try to find torrent sensors
-    const countEntity = this.hass.states['sensor.deluge_torrent_count'];
-    const activeEntity = this.hass.states['sensor.deluge_active_torrents'];
+    const countEntity = this.getSensor('torrent_count', 'sensor.deluge_torrent_count');
+    const activeEntity = this.getSensor('active_torrents', 'sensor.deluge_active_torrents');
     
     // If sensors don't exist at all
     if (!countEntity) {

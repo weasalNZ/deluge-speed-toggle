@@ -1,5 +1,5 @@
 {
-  "name": "Deluge Speed Toggle",
+  "name": "Deluge RPC Control",
   "content_in_root": false,
   "render_readme": true,
   "domains": ["switch", "sensor"],
