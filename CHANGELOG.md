@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Renamed the integration's Home Assistant display name to Deluge RPC Control; the internal domain remains unchanged.
+- Renamed the speed switch to Speed Toggle Deluge (`switch.speed_toggle_deluge`) and made the switch and toggle service find sensors and the switch by unique ID instead of fixed entity IDs.
 - Updated sensor names to use a trailing Deluge marker and made sensor unique IDs specific to each configured server.
 - Updated the status card to discover the new sensor IDs while retaining support for legacy IDs.
 

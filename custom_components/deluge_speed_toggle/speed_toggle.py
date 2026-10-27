@@ -6,6 +6,7 @@ from homeassistant.components.switch import SwitchEntity, SwitchDeviceClass
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import entity_registry as er
 from .const import (
     DOMAIN,
     CONF_PRESET1_DOWNLOAD,
@@ -151,8 +152,11 @@ async def async_setup_services(hass: HomeAssistant):
         config = hass.data[DOMAIN]
         host = config.get("host", "localhost")
         port = config.get("port", 8112)
-        switch_entity_id = f"switch.{DOMAIN}_{host}_{port}_switch"
-        switch_state = hass.states.get(switch_entity_id)
+        registry = er.async_get(hass)
+        switch_entity_id = registry.async_get_entity_id(
+            "switch", DOMAIN, f"{DOMAIN}_{host}_{port}_switch"
+        )
+        switch_state = hass.states.get(switch_entity_id) if switch_entity_id else None
         
         if switch_state is None:
             _LOGGER.error("Deluge speed toggle switch not found")
@@ -549,7 +553,8 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         """Initialize the switch."""
         self.hass = hass
         self.config = config
-        self._attr_name = "Deluge Speed Toggle"
+        self._attr_has_entity_name = False
+        self._attr_name = "Speed Toggle Deluge"
         host = config.get("host", "localhost")
         port = config.get("port", 8112)
         self._attr_unique_id = f"{DOMAIN}_{host}_{port}_switch"
@@ -568,6 +573,17 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         }
         
         _LOGGER.debug("Initialized DelugeSpeedToggleSwitch")
+
+    def _get_sensor_state(self, key: str):
+        """Find a sensor's state by unique ID so renamed entity IDs still work."""
+        host = self.config.get("host", "localhost")
+        port = self.config.get("port", 8112)
+        registry = er.async_get(self.hass)
+        for unique_id in (f"{DOMAIN}_{host}_{port}_{key}", f"{DOMAIN}_{key}"):
+            entity_id = registry.async_get_entity_id("sensor", DOMAIN, unique_id)
+            if entity_id:
+                return self.hass.states.get(entity_id)
+        return None
 
     async def async_added_to_hass(self):
         """When entity is added to hass."""
@@ -1105,11 +1121,11 @@ class DelugeSpeedToggleSwitch(SwitchEntity):
         # Try to get live monitoring data from sensor entities
         try:
             # Get sensor states from the registry
-            download_speed_entity = self.hass.states.get("sensor.deluge_download_speed")
-            upload_speed_entity = self.hass.states.get("sensor.deluge_upload_speed")
-            torrent_count_entity = self.hass.states.get("sensor.deluge_torrent_count")
-            active_torrents_entity = self.hass.states.get("sensor.deluge_active_torrents")
-            status_entity = self.hass.states.get("sensor.deluge_status")
+            download_speed_entity = self._get_sensor_state("download_speed_kbs")
+            upload_speed_entity = self._get_sensor_state("upload_speed_kbs")
+            torrent_count_entity = self._get_sensor_state("torrent_count")
+            active_torrents_entity = self._get_sensor_state("active_torrents")
+            status_entity = self._get_sensor_state("status")
             
             if download_speed_entity and download_speed_entity.state not in ["unknown", "unavailable"]:
                 # Add current speeds

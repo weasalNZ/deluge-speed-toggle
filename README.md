@@ -183,7 +183,7 @@ Add the following to your dashboard YAML:
 
 ```yaml
 type: custom:deluge-status-card
-entity: switch.deluge_speed_toggle
+entity: switch.speed_toggle_deluge
 name: "Deluge Server"
 show_speed: true
 show_torrents: true
@@ -193,7 +193,7 @@ Sensors have a trailing Deluge marker, such as `sensor.download_speed_deluge`. T
 
 ```yaml
 type: custom:deluge-status-card
-entity: switch.deluge_speed_toggle
+entity: switch.speed_toggle_deluge
 sensors:
   download_speed: sensor.download_speed_deluge
   upload_speed: sensor.upload_speed_deluge
@@ -229,7 +229,7 @@ automation:
   - alias: "Limit Deluge at night"
       at: "22:00:00"
     action:
-      entity_id: switch.deluge_speed_toggle
+      entity_id: switch.speed_toggle_deluge
 
   - alias: "Unlimited Deluge in morning"
     trigger:
@@ -237,7 +237,7 @@ automation:
       at: "08:00:00"
     action:
       service: switch.turn_on
-      entity_id: switch.deluge_speed_toggle
+      entity_id: switch.speed_toggle_deluge
 ```
   - `upload`: Upload speed in KiB/s (`-1` for unlimited)
 - **Example**:
@@ -279,7 +279,7 @@ automation:
 
 ### Card Not Displaying or Entity ID Issues
 
-Ensure the expected entity IDs exist (e.g., `switch.deluge_speed_toggle`).
+Ensure the expected entity IDs exist (e.g., `switch.speed_toggle_deluge`).
 
 Sensors use names ending in a “Deluge” marker (for example, **Download Speed Deluge** and `sensor.download_speed_deluge`). The device is named **Deluge Server** by default; you can change its name in device settings without changing sensor IDs. Sensor unique IDs are scoped to each configured host and port. After updating, restart Home Assistant; if entity IDs still show the old ordering, use **Recreate Entity IDs**:
 
