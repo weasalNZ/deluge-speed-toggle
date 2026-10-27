@@ -176,7 +176,7 @@ After copying or downloading the card file, complete these steps:
 ### 1. Add the resource in Home Assistant
 
 - Go to **Settings → Dashboards → Resources**
-- Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js` (type: JavaScript Module)
+- Add resource: `/local/hacsfiles/deluge-status-card/deluge-status-card.js?v=1.5` (type: JavaScript Module). When updating the card, change the `?v=` value so your browser loads the new file instead of a cached copy.
 
 ### 2. Add the card to your dashboard
 
@@ -352,8 +352,7 @@ This custom component is provided as-is for use with Home Assistant under the MI
 
 ## Version History
 
-- **Unreleased**: Renamed the integration to **Deluge RPC Control** in Home Assistant. The internal domain remains `deluge_speed_toggle`.
-- **Unreleased**: Entities now use the device name entered at setup plus the entity name, sensor unique IDs are specific to each server, and the status card finds sensors from the switch's prefix.
+- **1.5**: Renamed the integration to **Deluge RPC Control** (internal domain remains `deluge_speed_toggle`). Entities now use the device name entered at setup plus the entity name (e.g. `sensor.deluge_download_speed`, `switch.deluge_speed_toggle`). Sensor unique IDs are specific to each server, and the status card finds sensors from the switch's prefix.
 - **1.2**: Update all files previously under `/www/community/deluge-status-card/` are now under `/www/hacsfiles/deluge-status-card/`.
 - **1.1**: Added switch entity toggle, dual preset support, comprehensive error handling and logging
 - **1.0**: Initial release with set_speed service

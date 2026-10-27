@@ -236,7 +236,7 @@ class DelugeBaseSensor(SensorEntity):
             "name": coordinator.server_name,
             "manufacturer": "Deluge",
             "model": "Torrent Client",
-            "sw_version": "1.1",
+            "sw_version": "1.5",
         }
 
     async def async_added_to_hass(self):
